@@ -8,6 +8,7 @@ export class Game extends Scene {
         this.cursors = null;
         this.fences = null;
         this.background = null;
+        this.emote = null;
     }
 
     preload() {
@@ -16,6 +17,7 @@ export class Game extends Scene {
         this.load.spritesheet('lamb', 'lamb.png', { frameWidth: 64, frameHeight: 64 });
         this.load.image('background', 'background.png');
         this.load.spritesheet('fence', 'fence_sheet.png', { frameWidth: 64, frameHeight: 64 });
+        this.load.spritesheet('emote_bubbles', 'emote_bubble.png', { frameWidth: 32, frameHeight: 32 });
     }
 
     create() {
@@ -47,8 +49,26 @@ export class Game extends Scene {
 
         this.cursors = this.input.keyboard.createCursorKeys();
 
+        this.time.addEvent({
+            delay: 1000,
+            callback: this.toggleEmote,
+            callbackScope: this,
+            loop: true
+        });
+
         EventBus.emit('current-scene-ready', this);
 
+    }
+
+    toggleEmote() {
+        if (this.emote) {
+            this.emote.destroy();
+            this.emote = null;
+        } else {
+            this.emote = this.add.sprite(this.lamb.x, this.lamb.y, 'emote_bubbles');
+            this.emote.setScale(2);
+            this.emote.setFrame(Phaser.Math.Between(1, 3));
+        }
     }
 
     update() {
@@ -68,6 +88,12 @@ export class Game extends Scene {
             this.lamb.setVelocityY(240);
         } else {
             this.lamb.setVelocityY(0);
+        }
+
+        if (this.emote) {
+            this.emote.setFlipX(this.lamb.flipX);
+            this.emote.setX(this.lamb.flipX ? this.lamb.x + 72 : this.lamb.x - 72);
+            this.emote.y = this.lamb.y - 64;
         }
     }
 }
