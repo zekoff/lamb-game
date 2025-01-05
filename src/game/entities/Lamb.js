@@ -34,13 +34,16 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
     }
 
     update(time, delta) {
+        if (this.body.x != this.body.prev.x) {
+            this.body.velocity.x > 0 ? this.setFlipX(true) : this.setFlipX(false);
+        }
 
         if (this.manualMovementActive) {
             if (this.cursorKeys.left.isDown) {
                 this.setVelocityX(-240);
-                this.setFlipX(false);
+                // this.setFlipX(false);
             } else if (this.cursorKeys.right.isDown) {
-                this.setFlipX(true);
+                // this.setFlipX(true);
                 this.setVelocityX(240);
             } else {
                 this.setVelocityX(0);

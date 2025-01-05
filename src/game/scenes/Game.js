@@ -72,12 +72,6 @@ export class Game extends Scene {
     }
 
     update() {
-        // this.events.on('click', (pointer) => {
-        //     this.lamb.sendToLocation(pointer.x, pointer.y);
-        // });
-        // if (this.input.activePointer.isDown) {
-        //     this.handleMouseClick(this.input.activePointer.worldX, this.input.activePointer.worldY);
-        // }
         this.input.on('pointerup', (pointer) => {
             this.lamb.sendToLocation(pointer.x, pointer.y);
         });
