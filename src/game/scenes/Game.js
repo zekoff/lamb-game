@@ -51,7 +51,7 @@ export class Game extends Scene {
         this.events.on('postupdate', (time, delta) => {
             if (this.emote) {
                 this.emote.setFlipX(this.lamb.flipX);
-                this.emote.setX(this.lamb.flipX ? this.lamb.x + 72 : this.lamb.x - 72);
+                this.emote.setX(this.lamb.flipX ? this.lamb.x - 72 : this.lamb.x + 72);
                 this.emote.y = this.lamb.y - 64;
             }
         });

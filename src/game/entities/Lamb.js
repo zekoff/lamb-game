@@ -4,7 +4,7 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
 
     cursorKeys = null;
     manualMovementActive = true;
-    scene = null;
+    // scene = null;
     target = null;
 
     constructor(scene, x, y) {
@@ -35,7 +35,7 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
 
     update(time, delta) {
         if (this.body.x != this.body.prev.x) {
-            this.body.velocity.x > 0 ? this.setFlipX(true) : this.setFlipX(false);
+            this.body.velocity.x > 0 ? this.setFlipX(false) : this.setFlipX(true);
         }
 
         if (this.manualMovementActive) {
@@ -62,7 +62,7 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
                 this.setVelocity(0);
                 this.manualMovementActive = true;
                 this.target = null;
-                this.emit('reachtarget'); // Emit a custom event
+                this.emit('lamb-reached-target'); // Emit a custom event
             }
         }
 
