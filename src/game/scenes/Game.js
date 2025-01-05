@@ -1,5 +1,6 @@
 import { Scene } from 'phaser';
 import { EventBus } from '../EventBus';
+import Lamb from '../entities/Lamb';
 
 export class Game extends Scene {
     constructor() {
@@ -31,21 +32,9 @@ export class Game extends Scene {
             fence.setFrame(Phaser.Math.Between(0, 3));
         });
 
-        this.lamb = this.physics.add.sprite(this.scale.width / 2, this.scale.height / 2, 'lamb');
-        this.lamb.anims.create({
-            key: 'walk',
-            frames: this.lamb.anims.generateFrameNumbers('lamb', { start: 0, end: 1 }),
-            frameRate: 2,
-            repeat: -1
-        });
-        this.lamb.anims.play('walk');
-        this.lamb.setScale(2);
-        this.lamb.setCollideWorldBounds(true);
-        this.lamb.body.setOffset(0, 40);
-        this.lamb.body.setSize(64, 24, false);
+        this.lamb = new Lamb(this, this.scale.width / 2, this.scale.height / 2);
 
         this.physics.add.collider(this.lamb, this.fences);
-        // this.physics.collide(this.lamb, this.fences);
 
         this.cursors = this.input.keyboard.createCursorKeys();
 
@@ -54,6 +43,17 @@ export class Game extends Scene {
             callback: this.toggleEmote,
             callbackScope: this,
             loop: true
+        });
+
+        this.events.on('resize', (width, height) => {
+        });
+
+        this.events.on('postupdate', (time, delta) => {
+            if (this.emote) {
+                this.emote.setFlipX(this.lamb.flipX);
+                this.emote.setX(this.lamb.flipX ? this.lamb.x + 72 : this.lamb.x - 72);
+                this.emote.y = this.lamb.y - 64;
+            }
         });
 
         EventBus.emit('current-scene-ready', this);
@@ -72,28 +72,15 @@ export class Game extends Scene {
     }
 
     update() {
-        if (this.cursors.left.isDown) {
-            this.lamb.setVelocityX(-240);
-            this.lamb.setFlipX(false);
-        } else if (this.cursors.right.isDown) {
-            this.lamb.setFlipX(true);
-            this.lamb.setVelocityX(240);
-        } else {
-            this.lamb.setVelocityX(0);
-        }
-
-        if (this.cursors.up.isDown) {
-            this.lamb.setVelocityY(-240);
-        } else if (this.cursors.down.isDown) {
-            this.lamb.setVelocityY(240);
-        } else {
-            this.lamb.setVelocityY(0);
-        }
-
-        if (this.emote) {
-            this.emote.setFlipX(this.lamb.flipX);
-            this.emote.setX(this.lamb.flipX ? this.lamb.x + 72 : this.lamb.x - 72);
-            this.emote.y = this.lamb.y - 64;
-        }
+        // this.events.on('click', (pointer) => {
+        //     this.lamb.sendToLocation(pointer.x, pointer.y);
+        // });
+        // if (this.input.activePointer.isDown) {
+        //     this.handleMouseClick(this.input.activePointer.worldX, this.input.activePointer.worldY);
+        // }
+        this.input.on('pointerup', (pointer) => {
+            this.lamb.sendToLocation(pointer.x, pointer.y);
+        });
+        this.lamb.update()
     }
 }
