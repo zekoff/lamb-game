@@ -48,13 +48,6 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
         });
 
         this.scene.time.delayedCall(Phaser.Math.Between(2000, 5000), this.toggleEmote, [], this);
-        // this.scene.time.addEvent({
-        //     delay: Phaser.Math.Between(1000, 3000),
-        //     callback: this.toggleEmote,
-        //     callbackScope: this,
-        //     loop: false
-        // });
-
 
     }
 
@@ -108,6 +101,7 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
 
         }
         this.checkArrivedAtTarget();
+        this.depth = this.y;
     }
 
     checkArrivedAtTarget() {

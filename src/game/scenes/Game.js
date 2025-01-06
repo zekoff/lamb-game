@@ -7,7 +7,7 @@ const NUMBER_OF_LAMBS = 2;
 export class Game extends Scene {
     constructor() {
         super('Game');
-        this.lambs = [];
+        this.lambs = null;
         this.fences = null;
         this.background = null;
     }
@@ -31,11 +31,12 @@ export class Game extends Scene {
             fence.setFrame(Phaser.Math.Between(0, 3));
         });
 
-        for (let i = 0; i < NUMBER_OF_LAMBS; i++) {
+        this.lambs = this.add.group({ runChildUpdate: true });
+        repeat(NUMBER_OF_LAMBS, () => {
             const newLamb = new Lamb(this, Phaser.Math.Between(128, this.scale.width - 128), Phaser.Math.Between(128, this.scale.height - 128))
-            this.lambs.push(newLamb);
+            this.lambs.add(newLamb);
             this.physics.add.collider(newLamb, this.fences);
-        }
+        })
 
         this.events.on('resize', (width, height) => {
         });
@@ -45,8 +46,12 @@ export class Game extends Scene {
     }
 
     update() {
-        this.lambs.forEach(lamb => {
-            lamb.update();
-        });
+    }
+
+}
+
+function repeat(count, callback) {
+    for (let i = 0; i < count; i++) {
+        callback(i);
     }
 }
