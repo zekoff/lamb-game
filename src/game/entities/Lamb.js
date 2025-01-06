@@ -1,10 +1,13 @@
 import Phaser from 'phaser';
 
+const LAMB_STATE_WANDER = 'wander';
+const LAMB_STATE_DIRECT_CONTROL = 'direct-control';
+
+const LAMB_SPEED = 200;
+
 class Lamb extends Phaser.Physics.Arcade.Sprite {
 
     cursorKeys = null;
-    manualMovementActive = true;
-    // scene = null;
     target = null;
 
     constructor(scene, x, y) {
@@ -23,13 +26,39 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
         this.setCollideWorldBounds(true);
         this.body.setOffset(0, 40);
         this.body.setSize(64, 24, false);
+        this.state = LAMB_STATE_WANDER;
 
         this.cursorKeys = scene.input.keyboard.createCursorKeys();
+
+        this.setMovementMode(LAMB_STATE_WANDER);
+
+        this.on('lamb-reached-target', () => {
+            this.scene.time.delayedCall(2000, () => {
+                const newTarget = this.getRandomLocationInSceneBounds();
+                this.sendToLocation(newTarget.x, newTarget.y);
+            }, [], this);
+        });
+    }
+
+    setMovementMode(mode) {
+        if (mode === LAMB_STATE_WANDER) {
+            this.state = LAMB_STATE_WANDER;
+            if (!this.target) {
+                const newTarget = this.getRandomLocationInSceneBounds();
+                this.sendToLocation(newTarget.x, newTarget.y);
+            }
+            return;
+        }
+        if (mode === LAMB_STATE_DIRECT_CONTROL) {
+            this.state = LAMB_STATE_DIRECT_CONTROL;
+            this.target = null;
+            this.setVelocity(0);
+            return;
+        }
     }
 
     sendToLocation(x, y) {
-        this.manualMovementActive = false;
-        this.scene.physics.moveTo(this, x, y, 200);
+        this.scene.physics.moveTo(this, x, y, LAMB_SPEED);
         this.target = new Phaser.Math.Vector2(x, y);
     }
 
@@ -38,12 +67,10 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
             this.body.velocity.x > 0 ? this.setFlipX(false) : this.setFlipX(true);
         }
 
-        if (this.manualMovementActive) {
+        if (this.state === LAMB_STATE_DIRECT_CONTROL) {
             if (this.cursorKeys.left.isDown) {
                 this.setVelocityX(-240);
-                // this.setFlipX(false);
             } else if (this.cursorKeys.right.isDown) {
-                // this.setFlipX(true);
                 this.setVelocityX(240);
             } else {
                 this.setVelocityX(0);
@@ -56,16 +83,26 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
             } else {
                 this.setVelocityY(0);
             }
-        } else if (this.target) {
-            const distance = Phaser.Math.Distance.Between(this.x, this.y, this.target.x, this.target.y);
-            if (distance < 10) { // Adjust the threshold as needed
-                this.setVelocity(0);
-                this.manualMovementActive = true;
-                this.target = null;
-                this.emit('lamb-reached-target'); // Emit a custom event
-            }
         }
+        this.checkArrivedAtTarget();
+    }
 
+    checkArrivedAtTarget() {
+        if (!this.target) return;
+        const distance = Phaser.Math.Distance.Between(this.x, this.y, this.target.x, this.target.y);
+        if (distance < 10) { // Adjust the threshold as needed
+            this.setVelocity(0);
+            this.target = null;
+            this.emit('lamb-reached-target'); // Emit a custom event
+        }
+    }
+
+    getRandomLocationInSceneBounds() {
+        const EDGE_BUFFER = 128;
+        return new Phaser.Math.Vector2(
+            Phaser.Math.Between(EDGE_BUFFER, this.scene.scale.width - EDGE_BUFFER),
+            Phaser.Math.Between(EDGE_BUFFER, this.scene.scale.height - EDGE_BUFFER)
+        );
     }
 }
 
