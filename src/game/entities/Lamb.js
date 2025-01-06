@@ -1,67 +1,53 @@
 import Phaser from 'phaser';
-
-const LAMB_STATE_WANDER = 'wander';
-const LAMB_STATE_DIRECT_CONTROL = 'direct-control';
-
-const LAMB_SPEED = 200;
+import Emote from './Emote';
 
 class Lamb extends Phaser.Physics.Arcade.Sprite {
 
+    static LAMB_STATE_WANDER = 'wander';
+    static LAMB_STATE_DIRECT_CONTROL = 'direct-control';
+    static LAMB_SPEED = 200;
+
     cursorKeys = null;
     target = null;
-    emote = null;
+    childObjects = null;
 
     constructor(scene, x, y) {
         super(scene, x, y, 'lamb');
         scene.add.existing(this);
         scene.physics.add.existing(this);
-        this.anims.create({
-            key: 'walk',
-            frames: this.anims.generateFrameNumbers('lamb', { start: 0, end: 1 }),
-            frameRate: 2,
-            repeat: -1
-        });
-        this.anims.play('walk');
+        this.anims.play('lamb-walk');
         this.setScale(2);
         this.setCollideWorldBounds(true);
         this.body.setOffset(0, 40);
         this.body.setSize(64, 24, false);
-        this.state = LAMB_STATE_WANDER;
+        this.state = Lamb.LAMB_STATE_WANDER;
 
         this.cursorKeys = scene.input.keyboard.createCursorKeys();
 
-        this.setMovementMode(LAMB_STATE_WANDER);
+        this.setMovementMode(Lamb.LAMB_STATE_WANDER);
 
         this.on('lamb-reached-target', () => {
+            this.childObjects.add(new Emote(this, Phaser.Math.RND.pick([Emote.HEART, Emote.ANGRY, Emote.MUSIC])));
             this.scene.time.delayedCall(2000, () => {
                 const newTarget = this.getRandomLocationInSceneBounds();
                 this.sendToLocation(newTarget.x, newTarget.y);
             }, [], this);
         });
 
-        this.scene.events.on('postupdate', (time, delta) => {
-            if (this.emote) {
-                this.emote.setFlipX(this.flipX);
-                this.emote.setX(this.flipX ? this.x - 72 : this.x + 72);
-                this.emote.y = this.y - 60;
-            }
-        });
-
-        this.scene.time.delayedCall(Phaser.Math.Between(2000, 5000), this.toggleEmote, [], this);
-
+        this.childObjects = this.scene.add.group({ runChildUpdate: true });
     }
 
     setMovementMode(mode) {
-        if (mode === LAMB_STATE_WANDER) {
-            this.state = LAMB_STATE_WANDER;
+        if (mode === Lamb.LAMB_STATE_WANDER) {
+            this.state = Lamb.LAMB_STATE_WANDER;
             if (!this.target) {
                 const newTarget = this.getRandomLocationInSceneBounds();
                 this.sendToLocation(newTarget.x, newTarget.y);
             }
             return;
         }
-        if (mode === LAMB_STATE_DIRECT_CONTROL) {
-            this.state = LAMB_STATE_DIRECT_CONTROL;
+        if (mode === Lamb.LAMB_STATE_DIRECT_CONTROL) {
+            this.state = Lamb.LAMB_STATE_DIRECT_CONTROL;
             this.target = null;
             this.setVelocity(0);
             return;
@@ -69,7 +55,7 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
     }
 
     sendToLocation(x, y) {
-        this.scene.physics.moveTo(this, x, y, LAMB_SPEED);
+        this.scene.physics.moveTo(this, x, y, Lamb.LAMB_SPEED);
         this.target = new Phaser.Math.Vector2(x, y);
     }
 
@@ -78,7 +64,7 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
             this.body.velocity.x > 0 ? this.setFlipX(false) : this.setFlipX(true);
         }
 
-        if (this.state === LAMB_STATE_DIRECT_CONTROL) {
+        if (this.state === Lamb.LAMB_STATE_DIRECT_CONTROL) {
             if (this.cursorKeys.left.isDown) {
                 this.setVelocityX(-240);
             } else if (this.cursorKeys.right.isDown) {
@@ -100,18 +86,19 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
             });
 
         }
+
         this.checkArrivedAtTarget();
+
         this.depth = this.y;
-        if (this.emote) this.emote.depth = this.depth + 1;
     }
 
     checkArrivedAtTarget() {
         if (!this.target) return;
         const distance = Phaser.Math.Distance.Between(this.x, this.y, this.target.x, this.target.y);
-        if (distance < 10) { // Adjust the threshold as needed
+        if (distance < 10) { // Arbitrary threshold for "close enough"
             this.setVelocity(0);
             this.target = null;
-            this.emit('lamb-reached-target'); // Emit a custom event
+            this.emit('lamb-reached-target');
         }
     }
 
@@ -121,19 +108,6 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
             Phaser.Math.Between(EDGE_BUFFER, this.scene.scale.width - EDGE_BUFFER),
             Phaser.Math.Between(EDGE_BUFFER, this.scene.scale.height - EDGE_BUFFER)
         );
-    }
-
-    toggleEmote() {
-        if (this.emote) {
-            this.emote.destroy();
-            this.emote = null;
-            this.scene.time.delayedCall(Phaser.Math.Between(2000, 5000), this.toggleEmote, [], this);
-        } else {
-            this.emote = this.scene.add.sprite(this.x, this.y, 'emote_bubbles');
-            this.emote.setScale(2);
-            this.emote.setFrame(Phaser.Math.Between(1, 3));
-            this.scene.time.delayedCall(Phaser.Math.Between(2000, 5000), this.toggleEmote, [], this);
-        }
     }
 
 }

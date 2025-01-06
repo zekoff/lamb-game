@@ -5,6 +5,7 @@ import Lamb from '../entities/Lamb';
 const NUMBER_OF_LAMBS = 5;
 
 export class Game extends Scene {
+
     constructor() {
         super('Game');
         this.lambs = null;
@@ -21,7 +22,6 @@ export class Game extends Scene {
     }
 
     create() {
-
         this.background = this.add.tileSprite(0, 0, this.scale.width, this.scale.height, 'background');
         this.background.setOrigin(0, 0);
 
@@ -31,15 +31,20 @@ export class Game extends Scene {
             fence.setFrame(Phaser.Math.Between(0, 3));
         });
 
+        this.anims.create({
+            key: 'lamb-walk',
+            frames: this.anims.generateFrameNumbers('lamb', { start: 0, end: 1 }),
+            frameRate: 2,
+            repeat: -1
+        });
+
         this.lambs = this.add.group({ runChildUpdate: true });
         repeat(NUMBER_OF_LAMBS, () => {
             const newLamb = new Lamb(this, Phaser.Math.Between(128, this.scale.width - 128), Phaser.Math.Between(128, this.scale.height - 128))
             this.lambs.add(newLamb);
-            this.physics.add.collider(newLamb, this.fences);
         })
 
-        this.events.on('resize', (width, height) => {
-        });
+        this.physics.add.collider(this.lambs, this.fences);
 
         EventBus.emit('current-scene-ready', this);
 
