@@ -9,10 +9,10 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
 
     cursorKeys = null;
     target = null;
+    emote = null;
 
     constructor(scene, x, y) {
         super(scene, x, y, 'lamb');
-        this.scene = scene;
         scene.add.existing(this);
         scene.physics.add.existing(this);
         this.anims.create({
@@ -38,6 +38,24 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
                 this.sendToLocation(newTarget.x, newTarget.y);
             }, [], this);
         });
+
+        this.scene.events.on('postupdate', (time, delta) => {
+            if (this.emote) {
+                this.emote.setFlipX(this.flipX);
+                this.emote.setX(this.flipX ? this.x - 72 : this.x + 72);
+                this.emote.y = this.y - 64;
+            }
+        });
+
+        this.scene.time.delayedCall(Phaser.Math.Between(2000, 5000), this.toggleEmote, [], this);
+        // this.scene.time.addEvent({
+        //     delay: Phaser.Math.Between(1000, 3000),
+        //     callback: this.toggleEmote,
+        //     callbackScope: this,
+        //     loop: false
+        // });
+
+
     }
 
     setMovementMode(mode) {
@@ -83,6 +101,11 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
             } else {
                 this.setVelocityY(0);
             }
+
+            this.scene.input.on('pointerup', (pointer) => {
+                this.lamb.sendToLocation(pointer.x, pointer.y);
+            });
+
         }
         this.checkArrivedAtTarget();
     }
@@ -104,6 +127,20 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
             Phaser.Math.Between(EDGE_BUFFER, this.scene.scale.height - EDGE_BUFFER)
         );
     }
+
+    toggleEmote() {
+        if (this.emote) {
+            this.emote.destroy();
+            this.emote = null;
+            this.scene.time.delayedCall(Phaser.Math.Between(2000, 5000), this.toggleEmote, [], this);
+        } else {
+            this.emote = this.scene.add.sprite(this.x, this.y, 'emote_bubbles');
+            this.emote.setScale(2);
+            this.emote.setFrame(Phaser.Math.Between(1, 3));
+            this.scene.time.delayedCall(Phaser.Math.Between(2000, 5000), this.toggleEmote, [], this);
+        }
+    }
+
 }
 
 export default Lamb;

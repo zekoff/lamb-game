@@ -2,19 +2,18 @@ import { Scene } from 'phaser';
 import { EventBus } from '../EventBus';
 import Lamb from '../entities/Lamb';
 
+const NUMBER_OF_LAMBS = 2;
+
 export class Game extends Scene {
     constructor() {
         super('Game');
-        this.lamb = null;
-        this.cursors = null;
+        this.lambs = [];
         this.fences = null;
         this.background = null;
-        this.emote = null;
     }
 
     preload() {
         this.load.setPath('assets');
-
         this.load.spritesheet('lamb', 'lamb.png', { frameWidth: 64, frameHeight: 64 });
         this.load.image('background', 'background.png');
         this.load.spritesheet('fence', 'fence_sheet.png', { frameWidth: 64, frameHeight: 64 });
@@ -32,49 +31,22 @@ export class Game extends Scene {
             fence.setFrame(Phaser.Math.Between(0, 3));
         });
 
-        this.lamb = new Lamb(this, this.scale.width / 2, this.scale.height / 2);
-
-        this.physics.add.collider(this.lamb, this.fences);
-
-        this.cursors = this.input.keyboard.createCursorKeys();
-
-        this.time.addEvent({
-            delay: 1000,
-            callback: this.toggleEmote,
-            callbackScope: this,
-            loop: true
-        });
+        for (let i = 0; i < NUMBER_OF_LAMBS; i++) {
+            const newLamb = new Lamb(this, Phaser.Math.Between(128, this.scale.width - 128), Phaser.Math.Between(128, this.scale.height - 128))
+            this.lambs.push(newLamb);
+            this.physics.add.collider(newLamb, this.fences);
+        }
 
         this.events.on('resize', (width, height) => {
-        });
-
-        this.events.on('postupdate', (time, delta) => {
-            if (this.emote) {
-                this.emote.setFlipX(this.lamb.flipX);
-                this.emote.setX(this.lamb.flipX ? this.lamb.x - 72 : this.lamb.x + 72);
-                this.emote.y = this.lamb.y - 64;
-            }
         });
 
         EventBus.emit('current-scene-ready', this);
 
     }
 
-    toggleEmote() {
-        if (this.emote) {
-            this.emote.destroy();
-            this.emote = null;
-        } else {
-            this.emote = this.add.sprite(this.lamb.x, this.lamb.y, 'emote_bubbles');
-            this.emote.setScale(2);
-            this.emote.setFrame(Phaser.Math.Between(1, 3));
-        }
-    }
-
     update() {
-        this.input.on('pointerup', (pointer) => {
-            this.lamb.sendToLocation(pointer.x, pointer.y);
+        this.lambs.forEach(lamb => {
+            lamb.update();
         });
-        this.lamb.update()
     }
 }
