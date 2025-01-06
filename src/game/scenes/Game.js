@@ -2,7 +2,7 @@ import { Scene } from 'phaser';
 import { EventBus } from '../EventBus';
 import Lamb from '../entities/Lamb';
 
-const NUMBER_OF_LAMBS = 2;
+const NUMBER_OF_LAMBS = 5;
 
 export class Game extends Scene {
     constructor() {

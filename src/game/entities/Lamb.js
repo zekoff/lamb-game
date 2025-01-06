@@ -43,7 +43,7 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
             if (this.emote) {
                 this.emote.setFlipX(this.flipX);
                 this.emote.setX(this.flipX ? this.x - 72 : this.x + 72);
-                this.emote.y = this.y - 64;
+                this.emote.y = this.y - 60;
             }
         });
 
@@ -102,6 +102,7 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
         }
         this.checkArrivedAtTarget();
         this.depth = this.y;
+        if (this.emote) this.emote.depth = this.depth + 1;
     }
 
     checkArrivedAtTarget() {
