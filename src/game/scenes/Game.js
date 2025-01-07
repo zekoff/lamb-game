@@ -1,16 +1,19 @@
 import { Scene } from 'phaser';
 import { EventBus } from '../EventBus';
 import Lamb from '../entities/Lamb';
+import Food from '../entities/Food';
 
 const NUMBER_OF_LAMBS = 5;
 
 export class Game extends Scene {
 
+    lambs = null;
+    fences = null;
+    background = null;
+    pastureObjects = null;
+
     constructor() {
         super('Game');
-        this.lambs = null;
-        this.fences = null;
-        this.background = null;
     }
 
     preload() {
@@ -19,6 +22,7 @@ export class Game extends Scene {
         this.load.image('background', 'background.png');
         this.load.spritesheet('fence', 'fence_sheet.png', { frameWidth: 64, frameHeight: 64 });
         this.load.spritesheet('emote_bubbles', 'emote_bubble.png', { frameWidth: 32, frameHeight: 32 });
+        this.load.image('apple', 'apple.png');
     }
 
     create() {
@@ -39,12 +43,34 @@ export class Game extends Scene {
         });
 
         this.lambs = this.add.group({ runChildUpdate: true });
-        repeat(NUMBER_OF_LAMBS, () => {
-            const newLamb = new Lamb(this, Phaser.Math.Between(128, this.scale.width - 128), Phaser.Math.Between(128, this.scale.height - 128))
+        repeat(NUMBER_OF_LAMBS, (callNumber) => {
+            const newLamb = new Lamb(
+                this,
+                Phaser.Math.Between(128, this.scale.width - 128),
+                Phaser.Math.Between(128, this.scale.height - 128),
+                { hungry: true }
+            );
+            newLamb.name = `Lamb ${callNumber}`;
             this.lambs.add(newLamb);
         })
 
         this.physics.add.collider(this.lambs, this.fences);
+
+        this.pastureObjects = this.add.group({ runChildUpdate: true });
+        this.input.on('pointerup', (pointer) => {
+            this.pastureObjects.add(new Food(this, pointer.x, pointer.y));
+            const hungryLambs = this.lambs.getChildren().filter(lamb => lamb.wants.includes('hungry'));
+            if (hungryLambs.length > 0)
+                hungryLambs[0].sendToLocation(pointer.x, pointer.y);
+        });
+
+        this.physics.add.overlap(this.lambs, this.pastureObjects, (lamb, food) => {
+            if (lamb.wants.includes('hungry')) {
+                console.log(`Lamb ${lamb.name} is eating`);
+                lamb.eat(food);
+                food.destroy();
+            }
+        });
 
         EventBus.emit('current-scene-ready', this);
 

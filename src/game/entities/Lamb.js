@@ -10,8 +10,9 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
     cursorKeys = null;
     target = null;
     childObjects = null;
+    wants = [];
 
-    constructor(scene, x, y) {
+    constructor(scene, x, y, debugConfig = {}) {
         super(scene, x, y, 'lamb');
         scene.add.existing(this);
         scene.physics.add.existing(this);
@@ -29,12 +30,17 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
         this.on('lamb-reached-target', () => {
             this.childObjects.add(new Emote(this, Phaser.Math.RND.pick([Emote.HEART, Emote.ANGRY, Emote.MUSIC])));
             this.scene.time.delayedCall(2000, () => {
+                // BUG: if this fires when a lamb is on its way to feed itself, it will set the new location and no longer seek the food
                 const newTarget = this.getRandomLocationInSceneBounds();
                 this.sendToLocation(newTarget.x, newTarget.y);
             }, [], this);
         });
 
         this.childObjects = this.scene.add.group({ runChildUpdate: true });
+
+        if (debugConfig.hungry) {
+            this.wants.push('hungry');
+        }
     }
 
     setMovementMode(mode) {
@@ -108,6 +114,13 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
             Phaser.Math.Between(EDGE_BUFFER, this.scene.scale.width - EDGE_BUFFER),
             Phaser.Math.Between(EDGE_BUFFER, this.scene.scale.height - EDGE_BUFFER)
         );
+    }
+
+    eat() {
+        const hungryIndex = this.wants.indexOf('hungry');
+        if (hungryIndex !== -1) {
+            this.wants.splice(hungryIndex, 1);
+        }
     }
 
 }
