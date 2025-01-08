@@ -16,7 +16,7 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
         super(scene, x, y, 'lamb');
         scene.add.existing(this);
         scene.physics.add.existing(this);
-        this.anims.play('lamb-walk');
+        this.play({key: 'lamb-walk', delay: Phaser.Math.RND.between(0, 1000) });
         this.setScale(2);
         this.setCollideWorldBounds(true);
         this.body.setOffset(0, 40);
