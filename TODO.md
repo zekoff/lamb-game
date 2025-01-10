@@ -1,7 +1,12 @@
 # TODO
 
-- Lamb wanders on its own
-- Add behavior state machine to lamb
-- Drop food into the pasture
-- Lamb approaches and eats food
+- Add behavior state machine to lamb (or wants/needs?)
 - Add emote framework for lamb
+- Add hungry emote
+- Happy lambs drop coins
+- Integrate lamb state with Firebase
+- Add tail attachments and hats for lambs
+- Add overall happiness rating to lamb
+- Add shelter or building for lambs
+- Add toys for lambs to play with
+- Let the lambs play together

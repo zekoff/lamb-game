@@ -3,7 +3,7 @@ import { EventBus } from '../EventBus';
 import Lamb from '../entities/Lamb';
 import Food from '../entities/Food';
 
-const NUMBER_OF_LAMBS = 5;
+const NUMBER_OF_LAMBS = 2;
 
 export class Game extends Scene {
 
@@ -59,13 +59,13 @@ export class Game extends Scene {
         this.pastureObjects = this.add.group({ runChildUpdate: true });
         this.input.on('pointerup', (pointer) => {
             this.pastureObjects.add(new Food(this, pointer.x, pointer.y));
-            const hungryLambs = this.lambs.getChildren().filter(lamb => lamb.wants.includes('hungry'));
+            const hungryLambs = this.lambs.getChildren().filter(lamb => lamb.conditions.includes(Lamb.CONDITION_HUNGRY));
             if (hungryLambs.length > 0)
                 hungryLambs[0].sendToLocation(pointer.x, pointer.y);
         });
 
         this.physics.add.overlap(this.lambs, this.pastureObjects, (lamb, food) => {
-            if (lamb.wants.includes('hungry')) {
+            if (lamb.conditions.includes(Lamb.CONDITION_HUNGRY)) {
                 console.log(`Lamb ${lamb.name} is eating`);
                 lamb.eat(food);
                 food.destroy();
