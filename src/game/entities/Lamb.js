@@ -14,6 +14,8 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
     childObjects = null;
     conditions = [];
     timeSinceActivity = 0;
+    timeSinceEmote = 0;
+    timeTillNextEmote = 0;
 
     constructor(scene, x, y, debugConfig = {}) {
         super(scene, x, y, 'lamb');
@@ -22,8 +24,8 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
         this.play({ key: 'lamb-walk', delay: Phaser.Math.RND.between(0, 1000) });
         this.setScale(2);
         this.setCollideWorldBounds(true);
-        this.body.setOffset(0, 40);
-        this.body.setSize(64, 24, false);
+        // this.body.setOffset(0, 40);
+        // this.body.setSize(64, 24, false);
         this.state = Lamb.STATE_WANDER;
 
         this.cursorKeys = scene.input.keyboard.createCursorKeys();
@@ -31,7 +33,7 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
         this.setMovementMode(Lamb.STATE_WANDER);
 
         this.on('lamb-reached-target', () => {
-            this.emote(Phaser.Math.RND.pick([Emote.HEART, Emote.ANGRY, Emote.MUSIC]));
+            // this.emote(Phaser.Math.RND.pick([Emote.HEART, Emote.ANGRY, Emote.MUSIC]));
         });
 
         this.childObjects = this.scene.add.group({ runChildUpdate: true });
@@ -39,6 +41,8 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
         if (debugConfig.hungry) {
             this.conditions.push(Lamb.CONDITION_HUNGRY);
         }
+
+        this.timeTillNextEmote = Phaser.Math.RND.between(4000, 8000)
     }
 
     setMovementMode(mode) {
@@ -65,11 +69,21 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
 
     update(time, delta) {
         this.timeSinceActivity += delta;
+        this.timeSinceEmote += delta;
         if (this.target) {
             this.timeSinceActivity = 0;
         }
         if (this.timeSinceActivity > 5000) {
             this.addCondition(Lamb.CONDITION_BORED);
+        }
+        if (this.timeSinceEmote > this.timeTillNextEmote) {
+            this.timeSinceEmote = 0;
+            this.timeTillNextEmote = Phaser.Math.RND.between(4000, 8000);
+            if (this.conditions.includes(Lamb.CONDITION_HUNGRY)) {
+                this.emote(Emote.FOOD);
+            } else {
+                this.emote(Emote.MUSIC);
+            }
         }
 
         if (this.conditions.includes(Lamb.CONDITION_BORED)) {
