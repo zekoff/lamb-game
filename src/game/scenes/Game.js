@@ -2,6 +2,7 @@ import { Scene } from 'phaser';
 import { EventBus } from '../EventBus';
 import Lamb from '../entities/Lamb';
 import Food from '../entities/Food';
+import Coin from '../entities/Coin';
 
 const NUMBER_OF_LAMBS = 2;
 
@@ -23,6 +24,7 @@ export class Game extends Scene {
         this.load.spritesheet('fence', 'fence_sheet.png', { frameWidth: 64, frameHeight: 64 });
         this.load.spritesheet('emote_bubbles', 'emote_bubble.png', { frameWidth: 32, frameHeight: 32 });
         this.load.image('apple', 'apple.png');
+        this.load.spritesheet('coin', 'coin.png', { frameWidth: 32, frameHeight: 32 });
     }
 
     create() {
@@ -41,18 +43,29 @@ export class Game extends Scene {
             frameRate: 2,
             repeat: -1
         });
+        this.anims.create({
+            key: 'coin-spin',
+            frames: this.anims.generateFrameNumbers('coin', { start: 0, end: 5 }),
+            frameRate: 10,
+            repeat: -1,
+            yoyo: true
+        });
+
+        for (let i = 0; i < 5; i++) {
+            new Coin(this, Phaser.Math.RND.between(200, 600), Phaser.Math.RND.between(200, 600));
+        }
 
         this.lambs = this.add.group({ runChildUpdate: true });
-        repeat(NUMBER_OF_LAMBS, (callNumber) => {
+        Array.from({ length: NUMBER_OF_LAMBS }).forEach((_, index) => {
             const newLamb = new Lamb(
                 this,
                 Phaser.Math.Between(128, this.scale.width - 128),
                 Phaser.Math.Between(128, this.scale.height - 128),
                 { hungry: true }
             );
-            newLamb.name = `Lamb ${callNumber}`;
+            newLamb.name = `Lamb ${index}`;
             this.lambs.add(newLamb);
-        })
+        });
 
         this.physics.add.collider(this.lambs, this.fences);
 
@@ -79,10 +92,4 @@ export class Game extends Scene {
     update() {
     }
 
-}
-
-function repeat(count, callback) {
-    for (let i = 0; i < count; i++) {
-        callback(i);
-    }
 }
