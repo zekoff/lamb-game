@@ -24,8 +24,6 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
         this.play({ key: 'lamb-walk', delay: Phaser.Math.RND.between(0, 1000) });
         this.setScale(2);
         this.setCollideWorldBounds(true);
-        // this.body.setOffset(0, 40);
-        // this.body.setSize(64, 24, false);
         this.state = Lamb.STATE_WANDER;
 
         this.cursorKeys = scene.input.keyboard.createCursorKeys();
@@ -33,7 +31,6 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
         this.setMovementMode(Lamb.STATE_WANDER);
 
         this.on('lamb-reached-target', () => {
-            // this.emote(Phaser.Math.RND.pick([Emote.HEART, Emote.ANGRY, Emote.MUSIC]));
         });
 
         this.childObjects = this.scene.add.group({ runChildUpdate: true });

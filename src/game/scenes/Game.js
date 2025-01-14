@@ -25,17 +25,24 @@ export class Game extends Scene {
         this.load.spritesheet('emote_bubbles', 'emote_bubble.png', { frameWidth: 32, frameHeight: 32 });
         this.load.image('apple', 'apple.png');
         this.load.spritesheet('coin', 'coin.png', { frameWidth: 32, frameHeight: 32 });
+        this.load.image('nine-slice', 'test_nine_slice.png');
     }
 
     create() {
+
+        const gameLayer = this.add.layer();
+        const uiLayer = this.add.layer();
+
         this.background = this.add.tileSprite(0, 0, this.scale.width, this.scale.height, 'background');
         this.background.setOrigin(0, 0);
+        gameLayer.add(this.background);
 
         const fencesNeeded = Math.ceil(this.scale.width / 64);
         this.fences = this.physics.add.staticGroup({ key: 'fence', frame: 0, repeat: fencesNeeded, setXY: { x: 0, y: 32, stepX: 64 } });
         this.fences.getChildren().forEach(fence => {
             fence.setFrame(Phaser.Math.Between(0, 3));
         });
+        gameLayer.add(this.fences.getChildren());
 
         this.anims.create({
             key: 'lamb-walk',
@@ -52,7 +59,8 @@ export class Game extends Scene {
         });
 
         for (let i = 0; i < 5; i++) {
-            new Coin(this, Phaser.Math.RND.between(200, 600), Phaser.Math.RND.between(200, 600));
+            const newCoin = new Coin(this, Phaser.Math.RND.between(200, 600), Phaser.Math.RND.between(200, 600));
+            gameLayer.add(newCoin);
         }
 
         this.lambs = this.add.group({ runChildUpdate: true });
@@ -65,17 +73,43 @@ export class Game extends Scene {
             );
             newLamb.name = `Lamb ${index}`;
             this.lambs.add(newLamb);
+            gameLayer.add(newLamb);
         });
 
         this.physics.add.collider(this.lambs, this.fences);
 
         this.pastureObjects = this.add.group({ runChildUpdate: true });
         this.input.on('pointerup', (pointer) => {
-            this.pastureObjects.add(new Food(this, pointer.x, pointer.y));
+            const newFood = new Food(this, pointer.x, pointer.y)
+            this.pastureObjects.add(newFood);
+            gameLayer.add(newFood);
             const hungryLambs = this.lambs.getChildren().filter(lamb => lamb.conditions.includes(Lamb.CONDITION_HUNGRY));
             if (hungryLambs.length > 0)
                 hungryLambs[0].sendToLocation(pointer.x, pointer.y);
         });
+
+        // const bottomShelf = this.add.nineslice(0, this.scale.height - 128, 'nine_slice', 0, this.scale.width, 128,16,16,16,16);
+        const bottomShelf = this.make.nineslice({
+            x: 128,
+            y: this.scale.height - 128,
+            key: 'nine-slice',
+            width: this.scale.width / 2 - 128,
+            height: 64,
+            leftWidth: 16,
+            rightWidth: 16,
+            topHeight: 16,
+            bottomHeight: 16,
+            scale: {
+                x: 2,
+                y: 2
+            },
+            origin: {
+                x: 0,
+                y: 0
+            },
+            add: true
+        });
+        uiLayer.add(bottomShelf);
 
         this.physics.add.overlap(this.lambs, this.pastureObjects, (lamb, food) => {
             if (lamb.conditions.includes(Lamb.CONDITION_HUNGRY)) {
