@@ -12,6 +12,7 @@ export class Game extends Scene {
     fences = null;
     background = null;
     pastureObjects = null;
+    draggableFood = null;
 
     constructor() {
         super('Game');
@@ -32,6 +33,13 @@ export class Game extends Scene {
 
         const gameLayer = this.add.layer();
         const uiLayer = this.add.layer();
+        this.pastureObjects = this.add.group({
+            runChildUpdate: true,
+            // createCallback: (child) => {
+            //     child.setInteractive();
+            //     child.on('pointerup', clicked => clicked.destroy(), child);
+            // }
+        });
 
         this.background = this.add.tileSprite(0, 0, this.scale.width, this.scale.height, 'background');
         this.background.setOrigin(0, 0);
@@ -61,6 +69,7 @@ export class Game extends Scene {
         for (let i = 0; i < 5; i++) {
             const newCoin = new Coin(this, Phaser.Math.RND.between(200, 600), Phaser.Math.RND.between(200, 600));
             gameLayer.add(newCoin);
+            this.pastureObjects.add(newCoin);
         }
 
         this.lambs = this.add.group({ runChildUpdate: true });
@@ -78,15 +87,14 @@ export class Game extends Scene {
 
         this.physics.add.collider(this.lambs, this.fences);
 
-        this.pastureObjects = this.add.group({ runChildUpdate: true });
-        this.input.on('pointerup', (pointer) => {
-            const newFood = new Food(this, pointer.x, pointer.y)
-            this.pastureObjects.add(newFood);
-            gameLayer.add(newFood);
-            const hungryLambs = this.lambs.getChildren().filter(lamb => lamb.conditions.includes(Lamb.CONDITION_HUNGRY));
-            if (hungryLambs.length > 0)
-                hungryLambs[0].sendToLocation(pointer.x, pointer.y);
-        });
+        // this.input.on('pointerup', (pointer) => {
+        //     const newFood = new Food(this, pointer.x, pointer.y)
+        //     this.pastureObjects.add(newFood);
+        //     gameLayer.add(newFood);
+        //     const hungryLambs = this.lambs.getChildren().filter(lamb => lamb.conditions.includes(Lamb.CONDITION_HUNGRY));
+        //     if (hungryLambs.length > 0)
+        //         hungryLambs[0].sendToLocation(pointer.x, pointer.y);
+        // });
 
         // const bottomShelf = this.add.nineslice(0, this.scale.height - 128, 'nine_slice', 0, this.scale.width, 128,16,16,16,16);
         const bottomShelf = this.make.nineslice({
@@ -111,6 +119,16 @@ export class Game extends Scene {
         });
         uiLayer.add(bottomShelf);
 
+        this.populateDraggableFood();
+        this.events.on('food-dropped', (food) => {
+            this.pastureObjects.add(food);
+            gameLayer.add(food);
+            const hungryLambs = this.lambs.getChildren().filter(lamb => lamb.conditions.includes(Lamb.CONDITION_HUNGRY));
+            if (hungryLambs.length > 0)
+                hungryLambs[0].sendToLocation(food.x, food.y);
+            this.populateDraggableFood()
+        });
+
         this.physics.add.overlap(this.lambs, this.pastureObjects, (lamb, food) => {
             if (lamb.conditions.includes(Lamb.CONDITION_HUNGRY)) {
                 console.log(`Lamb ${lamb.name} is eating`);
@@ -124,6 +142,10 @@ export class Game extends Scene {
     }
 
     update() {
+    }
+
+    populateDraggableFood() {
+        this.draggableFood = new Food(this, 256, this.scale.height - 64);
     }
 
 }
