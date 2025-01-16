@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import Emote from './Emote';
+import Coin from './Coin';
 
 class Lamb extends Phaser.Physics.Arcade.Sprite {
 
@@ -141,6 +142,19 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
 
     eat() {
         this.removeCondition(Lamb.CONDITION_HUNGRY);
+        Array.from({length: 5}).forEach(() => {
+            let newCoin = new Coin(this.scene, this.x, this.y);
+            this.scene.tweens.add({
+                targets: newCoin,
+                x: this.x + Phaser.Math.Between(-64, 64),
+                y: this.y + Phaser.Math.Between(-64, 64),
+                duration: 500,
+                ease: 'Power1',
+                onComplete: () => {
+                    // newCoin.destroy();
+                }
+            });
+        });
     }
 
     addCondition(condition) {

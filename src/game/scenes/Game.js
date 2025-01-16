@@ -66,12 +66,6 @@ export class Game extends Scene {
             yoyo: true
         });
 
-        for (let i = 0; i < 5; i++) {
-            const newCoin = new Coin(this, Phaser.Math.RND.between(200, 600), Phaser.Math.RND.between(200, 600));
-            gameLayer.add(newCoin);
-            this.pastureObjects.add(newCoin);
-        }
-
         this.lambs = this.add.group({ runChildUpdate: true });
         Array.from({ length: NUMBER_OF_LAMBS }).forEach((_, index) => {
             const newLamb = new Lamb(

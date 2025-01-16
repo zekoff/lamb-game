@@ -1,8 +1,6 @@
 # TODO
 
 - Add behavior state machine to lamb (or wants/needs?)
-- Add emote framework for lamb
-- Add hungry emote
 - Happy lambs drop coins
 - Integrate lamb state with Firebase
 - Add tail attachments and hats for lambs
