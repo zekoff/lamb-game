@@ -13,6 +13,7 @@ export class Game extends Scene {
     background = null;
     pastureObjects = null;
     draggableFood = null;
+    coins = 0;
 
     constructor() {
         super('Game');
@@ -112,6 +113,12 @@ export class Game extends Scene {
             add: true
         });
         uiLayer.add(bottomShelf);
+        const coinsText = this.add.text(128, 128, `Coins: ${this.coins}`, { color: 'black', fontSize: '24px', backgroundColor: 'white' });
+        uiLayer.add(coinsText);
+        this.events.on('coin-collected', () => {
+            this.coins++;
+            coinsText.setText(`Coins: ${this.coins}`);
+        });
 
         this.populateDraggableFood();
         this.events.on('food-dropped', (food) => {

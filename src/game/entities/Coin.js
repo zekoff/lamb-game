@@ -10,8 +10,8 @@ class Coin extends Phaser.Physics.Arcade.Sprite {
     }
 
     collect() {
+        this.scene.events.emit('coin-collected');
         this.destroy();
-        // Add any additional logic for when the coin is collected
     }
 }
 
