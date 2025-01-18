@@ -14,6 +14,7 @@ export class Game extends Scene {
     pastureObjects = null;
     draggableFood = null;
     coins = 0;
+    coinsText = null;
 
     constructor() {
         super('Game');
@@ -54,6 +55,12 @@ export class Game extends Scene {
         gameLayer.add(this.fences.getChildren());
 
         this.anims.create({
+            key: 'lamb-idle',
+            frames: this.anims.generateFrameNumbers('lamb', { start: 1, end: 1 }),
+            frameRate: 1,
+            repeat: -1
+        });
+        this.anims.create({
             key: 'lamb-walk',
             frames: this.anims.generateFrameNumbers('lamb', { start: 0, end: 1 }),
             frameRate: 2,
@@ -82,16 +89,6 @@ export class Game extends Scene {
 
         this.physics.add.collider(this.lambs, this.fences);
 
-        // this.input.on('pointerup', (pointer) => {
-        //     const newFood = new Food(this, pointer.x, pointer.y)
-        //     this.pastureObjects.add(newFood);
-        //     gameLayer.add(newFood);
-        //     const hungryLambs = this.lambs.getChildren().filter(lamb => lamb.conditions.includes(Lamb.CONDITION_HUNGRY));
-        //     if (hungryLambs.length > 0)
-        //         hungryLambs[0].sendToLocation(pointer.x, pointer.y);
-        // });
-
-        // const bottomShelf = this.add.nineslice(0, this.scale.height - 128, 'nine_slice', 0, this.scale.width, 128,16,16,16,16);
         const bottomShelf = this.make.nineslice({
             x: 128,
             y: this.scale.height - 128,
@@ -113,11 +110,9 @@ export class Game extends Scene {
             add: true
         });
         uiLayer.add(bottomShelf);
-        const coinsText = this.add.text(128, 128, `Coins: ${this.coins}`, { color: 'black', fontSize: '24px', backgroundColor: 'white' });
-        uiLayer.add(coinsText);
-        this.events.on('coin-collected', () => {
-            this.coins++;
-            coinsText.setText(`Coins: ${this.coins}`);
+        this.coinsText = this.add.text(128, 128, `Coins: ${this.coins}`, { color: 'black', fontSize: '24px', backgroundColor: 'white' });
+        uiLayer.add(this.coinsText);
+        this.events.on('coin-collected', (coin) => {
         });
 
         this.populateDraggableFood();

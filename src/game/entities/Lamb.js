@@ -22,7 +22,7 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
         super(scene, x, y, 'lamb');
         scene.add.existing(this);
         scene.physics.add.existing(this);
-        this.play({ key: 'lamb-walk', delay: Phaser.Math.RND.between(0, 1000) });
+        this.play({ key: 'lamb-idle'});
         this.setScale(2);
         this.setCollideWorldBounds(true);
         this.state = Lamb.STATE_WANDER;
@@ -61,6 +61,7 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
     }
 
     sendToLocation(x, y) {
+        this.play('lamb-walk');
         this.scene.physics.moveTo(this, x, y, Lamb.SPEED);
         this.target = new Phaser.Math.Vector2(x, y);
     }
@@ -129,6 +130,7 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
             this.setVelocity(0);
             this.target = null;
             this.emit('lamb-reached-target');
+            this.anims.play('lamb-idle');
         }
     }
 
@@ -144,14 +146,19 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
         this.removeCondition(Lamb.CONDITION_HUNGRY);
         Array.from({length: 5}).forEach(() => {
             let newCoin = new Coin(this.scene, this.x, this.y);
+            newCoin.setVisible(false);
             this.scene.tweens.add({
+                onStart: () => {
+                    newCoin.setVisible(true);
+                },
+                delay: Phaser.Math.RND.between(0, 1000),
                 targets: newCoin,
                 x: this.x + Phaser.Math.Between(-64, 64),
                 y: this.y + Phaser.Math.Between(-64, 64),
-                duration: 500,
+                duration: 1000,
                 ease: 'Power1',
                 onComplete: () => {
-                    // newCoin.destroy();
+                    newCoin.collect();
                 }
             });
         });
