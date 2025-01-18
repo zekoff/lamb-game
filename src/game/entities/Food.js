@@ -15,16 +15,12 @@ class Food extends Phaser.GameObjects.Sprite {
             this.scene.events.emit('food-dropped', this);
             this.scene.tweens.add({
                 targets: this,
-                // x: this.x,
-                // y: this.y,
                 scale: 1,
                 duration: 500,
                 ease: 'Bounce.easeOut'
             });
         });
     }
-
-    // Add any additional methods or properties here
 
 }
 

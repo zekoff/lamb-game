@@ -22,7 +22,7 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
         super(scene, x, y, 'lamb');
         scene.add.existing(this);
         scene.physics.add.existing(this);
-        this.play({ key: 'lamb-idle'});
+        this.play({ key: 'lamb-idle' });
         this.setScale(2);
         this.setCollideWorldBounds(true);
         this.state = Lamb.STATE_WANDER;
@@ -92,7 +92,11 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
         }
 
         if (this.body.x != this.body.prev.x) {
-            this.body.velocity.x > 0 ? this.setFlipX(false) : this.setFlipX(true);
+            if (this.body.velocity.x > 0) {
+                this.setFlipX(false);
+            } else if (this.body.velocity.x < 0) {
+                this.setFlipX(true);
+            }
         }
 
         if (this.state === Lamb.STATE_DIRECT_CONTROL) {
@@ -143,8 +147,11 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
     }
 
     eat() {
+        this.target = null;
+        this.setVelocity(0);
+        this.play('lamb-eat').chain('lamb-idle');
         this.removeCondition(Lamb.CONDITION_HUNGRY);
-        Array.from({length: 5}).forEach(() => {
+        Array.from({ length: 5 }).forEach(() => {
             let newCoin = new Coin(this.scene, this.x, this.y);
             newCoin.setVisible(false);
             this.scene.tweens.add({

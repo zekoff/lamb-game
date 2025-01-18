@@ -2,7 +2,6 @@ import { Scene } from 'phaser';
 import { EventBus } from '../EventBus';
 import Lamb from '../entities/Lamb';
 import Food from '../entities/Food';
-import Coin from '../entities/Coin';
 
 const NUMBER_OF_LAMBS = 2;
 
@@ -37,10 +36,6 @@ export class Game extends Scene {
         const uiLayer = this.add.layer();
         this.pastureObjects = this.add.group({
             runChildUpdate: true,
-            // createCallback: (child) => {
-            //     child.setInteractive();
-            //     child.on('pointerup', clicked => clicked.destroy(), child);
-            // }
         });
 
         this.background = this.add.tileSprite(0, 0, this.scale.width, this.scale.height, 'background');
@@ -56,7 +51,7 @@ export class Game extends Scene {
 
         this.anims.create({
             key: 'lamb-idle',
-            frames: this.anims.generateFrameNumbers('lamb', { start: 1, end: 1 }),
+            frames: this.anims.generateFrameNumbers('lamb', { start: 0, end: 0 }),
             frameRate: 1,
             repeat: -1
         });
@@ -65,6 +60,11 @@ export class Game extends Scene {
             frames: this.anims.generateFrameNumbers('lamb', { start: 0, end: 1 }),
             frameRate: 2,
             repeat: -1
+        });
+        this.anims.create({
+            key: 'lamb-eat',
+            frames: this.anims.generateFrameNumbers('lamb', { start: 2, end: 2 }),
+            duration: 1000
         });
         this.anims.create({
             key: 'coin-spin',
