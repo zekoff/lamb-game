@@ -129,6 +129,7 @@ export class Game extends Scene {
             if (lamb.conditions.includes(Lamb.CONDITION_HUNGRY)) {
                 console.log(`Lamb ${lamb.name} is eating`);
                 lamb.eat(food);
+                food.timeoutTimer.remove();
                 food.destroy();
             }
         });
