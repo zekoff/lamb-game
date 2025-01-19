@@ -75,14 +75,17 @@ export class Game extends Scene {
         });
 
         this.lambs = this.add.group({ runChildUpdate: true });
-        Array.from({ length: NUMBER_OF_LAMBS }).forEach((_, index) => {
+        const lambie = {name: "Lambie", tint: 0xcccccc};
+        const mambie = {name: "Mambie", tint: 0xffffff};
+        [lambie, mambie].forEach((config, index) => {
             const newLamb = new Lamb(
                 this,
                 Phaser.Math.Between(128, this.scale.width - 128),
                 Phaser.Math.Between(128, this.scale.height - 128),
                 { hungry: true }
             );
-            newLamb.name = `Lamb ${index}`;
+            newLamb.name = config.name;
+            newLamb.setTint(config.tint);
             this.lambs.add(newLamb);
             gameLayer.add(newLamb);
         });
@@ -127,7 +130,6 @@ export class Game extends Scene {
 
         this.physics.add.overlap(this.lambs, this.pastureObjects, (lamb, food) => {
             if (lamb.conditions.includes(Lamb.CONDITION_HUNGRY)) {
-                console.log(`Lamb ${lamb.name} is eating`);
                 lamb.eat(food);
                 food.timeoutTimer.remove();
                 food.destroy();

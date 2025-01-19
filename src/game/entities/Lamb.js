@@ -9,13 +9,14 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
     static CONDITION_HUNGRY = 'hungry';
     static CONDITION_BORED = 'bored';
 
-    cursorKeys = null;
     target = null;
     childObjects = null;
     conditions = [];
     timeSinceActivity = 0;
     timeSinceEmote = 0;
     timeTillNextEmote = 0;
+    happiness = 100;
+    hunger = 0;
 
     constructor(scene, x, y, debugConfig = {}) {
         super(scene, x, y, 'lamb');
@@ -28,8 +29,6 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
 
         this.setInteractive();
         this.on('pointerup', this.pet, this);
-
-        this.cursorKeys = scene.input.keyboard.createCursorKeys();
 
         this.setMovementMode(Lamb.STATE_WANDER);
 
@@ -120,6 +119,7 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
     }
 
     eat() {
+        console.log(`${lamb.name} is eating`);
         this.target = null;
         this.setVelocity(0);
         this.play('lamb-eat').chain('lamb-idle');
@@ -145,6 +145,7 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
     }
 
     pet() {
+        console.log(`Petting ${this.name}`);
         this.disableInteractive();
         this.emote(Emote.HEART);
         this.scene.tweens.add({
