@@ -5,7 +5,6 @@ import Coin from './Coin';
 class Lamb extends Phaser.Physics.Arcade.Sprite {
 
     static STATE_WANDER = 'wander';
-    static STATE_DIRECT_CONTROL = 'direct-control';
     static SPEED = 100;
     static CONDITION_HUNGRY = 'hungry';
     static CONDITION_BORED = 'bored';
@@ -26,6 +25,9 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
         this.setScale(2);
         this.setCollideWorldBounds(true);
         this.state = Lamb.STATE_WANDER;
+
+        this.setInteractive();
+        this.on('pointerup', this.pet, this);
 
         this.cursorKeys = scene.input.keyboard.createCursorKeys();
 
@@ -52,12 +54,6 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
             }
             return;
         }
-        if (mode === Lamb.STATE_DIRECT_CONTROL) {
-            this.state = Lamb.STATE_DIRECT_CONTROL;
-            this.target = null;
-            this.setVelocity(0);
-            return;
-        }
     }
 
     sendToLocation(x, y) {
@@ -69,6 +65,8 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
     update(time, delta) {
         this.timeSinceActivity += delta;
         this.timeSinceEmote += delta;
+        this.depth = this.y;
+
         if (this.target) {
             this.timeSinceActivity = 0;
         }
@@ -99,32 +97,7 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
             }
         }
 
-        if (this.state === Lamb.STATE_DIRECT_CONTROL) {
-            if (this.cursorKeys.left.isDown) {
-                this.setVelocityX(-240);
-            } else if (this.cursorKeys.right.isDown) {
-                this.setVelocityX(240);
-            } else {
-                this.setVelocityX(0);
-            }
-
-            if (this.cursorKeys.up.isDown) {
-                this.setVelocityY(-240);
-            } else if (this.cursorKeys.down.isDown) {
-                this.setVelocityY(240);
-            } else {
-                this.setVelocityY(0);
-            }
-
-            this.scene.input.on('pointerup', (pointer) => {
-                this.lamb.sendToLocation(pointer.x, pointer.y);
-            });
-
-        }
-
         this.checkArrivedAtTarget();
-
-        this.depth = this.y;
     }
 
     checkArrivedAtTarget() {
@@ -168,6 +141,20 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
                     newCoin.collect();
                 }
             });
+        });
+    }
+
+    pet() {
+        this.disableInteractive();
+        this.emote(Emote.HEART);
+        this.scene.tweens.add({
+            targets: this,
+            scaleY: this.scaleY * .9,
+            scaleX: this.scaleX * 1.1,
+            duration: 250,
+            ease: 'Power2',
+            yoyo: true,
+            onComplete: () => this.setInteractive(),
         });
     }
 
