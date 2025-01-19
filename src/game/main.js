@@ -24,6 +24,7 @@ const config = {
 };
 
 const StartGame = (parent) => {
+    console.log('Starting game');
     return new Game({ ...config, parent });
 }
 
