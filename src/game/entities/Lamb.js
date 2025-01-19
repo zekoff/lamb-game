@@ -119,7 +119,7 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
     }
 
     eat() {
-        console.log(`${lamb.name} is eating`);
+        console.log(`${this.name} is eating`);
         this.target = null;
         this.setVelocity(0);
         this.play('lamb-eat').chain('lamb-idle');

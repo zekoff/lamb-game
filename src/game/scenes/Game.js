@@ -130,6 +130,7 @@ export class Game extends Scene {
         });
 
         this.physics.add.overlap(this.lambs, this.pastureObjects, (lamb, food) => {
+            console.log('lamb overlaps food');
             if (lamb.conditions.includes(Lamb.CONDITION_HUNGRY)) {
                 lamb.eat(food);
                 food.timeoutTimer.remove();
