@@ -8,11 +8,12 @@ export const PhaserGame = forwardRef(function PhaserGame({ currentActiveScene },
     const game = useRef();
     const [lambs, setLambs] = useState([]);
     const firebaseListenerSet = useRef(false); // Ref to track if the listener is set
+    const [phaserLoaded, setPhaserLoaded] = useState(false);
 
     useEffect(() => {
         // const app = getApp();
         // const database = getDatabase(app);
-        if (!firebaseListenerSet.current) {
+        if (!firebaseListenerSet.current && phaserLoaded) {
 
             const database = getDatabase();
             const dbRef = fbDbRef(database);
@@ -41,7 +42,7 @@ export const PhaserGame = forwardRef(function PhaserGame({ currentActiveScene },
             firebaseListenerSet.current = true;
         }
 
-    }, []);
+    }, [phaserLoaded]);
 
     // Create the game inside a useLayoutEffect hook to avoid the game being created outside the DOM
     useLayoutEffect(() => {
@@ -74,7 +75,7 @@ export const PhaserGame = forwardRef(function PhaserGame({ currentActiveScene },
         console.log('in useeffect in PhaserGame');
 
         EventBus.on('current-scene-ready', (currentScene) => {
-
+            setPhaserLoaded(true);
             if (currentActiveScene instanceof Function) {
                 currentActiveScene(currentScene);
             }
