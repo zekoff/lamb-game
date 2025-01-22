@@ -2,8 +2,7 @@ import { Scene } from 'phaser';
 import { EventBus } from '../EventBus';
 import Lamb from '../entities/Lamb';
 import Food from '../entities/Food';
-
-const NUMBER_OF_LAMBS = 2;
+import { getDatabase } from 'firebase/database';
 
 export class Game extends Scene {
 
@@ -75,21 +74,19 @@ export class Game extends Scene {
         });
 
         this.lambs = this.add.group({ runChildUpdate: true });
-        EventBus.on('lamb-data-loaded', (lambList) => { this.createLambs(lambList, gameLayer); }, this);
-        // const lambie = {name: "Lambie", tint: 0xcccccc};
-        // const mambie = {name: "Mambie", tint: 0xffffff};
-        // [lambie, mambie].forEach((config, index) => {
-        //     const newLamb = new Lamb(
-        //         this,
-        //         Phaser.Math.Between(128, this.scale.width - 128),
-        //         Phaser.Math.Between(128, this.scale.height - 128),
-        //         { hungry: true }
-        //     );
-        //     newLamb.name = config.name;
-        //     newLamb.setTint(config.tint);
-        //     this.lambs.add(newLamb);
-        //     gameLayer.add(newLamb);
-        // });
+        const database = getDatabase();
+        const myRef = dbRef(database);
+        get(child(myRef, '/')).then((snapshot) => {
+            if (snapshot.exists()) {
+                console.log(snapshot.val());
+                this.createLambs(snapshot.val(), gameLayer);
+            } else {
+                console.log('No data available');
+            }
+        }).catch((error) => {
+            console.error(error);
+        });
+
 
         this.physics.add.collider(this.lambs, this.fences);
 
