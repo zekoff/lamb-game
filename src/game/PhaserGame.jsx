@@ -8,8 +8,6 @@ export const PhaserGame = forwardRef(function PhaserGame({ currentActiveScene },
     // Create the game inside a useLayoutEffect hook to avoid the game being created outside the DOM
     useLayoutEffect(() => {
 
-        console.log('inside useLayoutEffect in PhaserGame');
-
         if (game.current === undefined) {
             game.current = StartGame("game-container");
 
@@ -31,7 +29,6 @@ export const PhaserGame = forwardRef(function PhaserGame({ currentActiveScene },
     useEffect(() => {
 
         EventBus.on('current-scene-ready', (currentScene) => {
-            setPhaserLoaded(true);
             if (currentActiveScene instanceof Function) {
                 currentActiveScene(currentScene);
             }

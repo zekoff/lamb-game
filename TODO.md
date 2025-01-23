@@ -6,4 +6,4 @@
 - Let the lambs play together
 - Drag lambs to pick them up
 - Add different backgrounds
-- Integrate Firebase directly into Phaser Game (not via event messages to React)
+- Store additional game state in Firebase

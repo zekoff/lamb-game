@@ -2,7 +2,7 @@ import { Scene } from 'phaser';
 import { EventBus } from '../EventBus';
 import Lamb from '../entities/Lamb';
 import Food from '../entities/Food';
-import { getDatabase } from 'firebase/database';
+import { getDatabase, child, ref, get, onValue, increment, update } from 'firebase/database';
 
 export class Game extends Scene {
 
@@ -74,9 +74,8 @@ export class Game extends Scene {
         });
 
         this.lambs = this.add.group({ runChildUpdate: true });
-        const database = getDatabase();
-        const myRef = dbRef(database);
-        get(child(myRef, '/')).then((snapshot) => {
+        const dbRef = ref(getDatabase());
+        get(child(dbRef, 'lambs')).then((snapshot) => {
             if (snapshot.exists()) {
                 console.log(snapshot.val());
                 this.createLambs(snapshot.val(), gameLayer);
@@ -86,7 +85,10 @@ export class Game extends Scene {
         }).catch((error) => {
             console.error(error);
         });
-
+        onValue(child(dbRef, 'inventory'), (snapshot) => {
+            console.log(snapshot.val());
+            this.coins = snapshot.val().coins;
+        });
 
         this.physics.add.collider(this.lambs, this.fences);
 
@@ -114,6 +116,9 @@ export class Game extends Scene {
         this.coinsText = this.add.text(128, 128, `Coins: ${this.coins}`, { color: 'black', fontSize: '24px', backgroundColor: 'white' });
         uiLayer.add(this.coinsText);
         this.events.on('coin-collected', (coin) => {
+            const fbUpdates = {};
+            fbUpdates[`/inventory/coins`] = increment(1);
+            update(ref(getDatabase()), fbUpdates);
         });
 
         this.populateDraggableFood();
@@ -159,6 +164,7 @@ export class Game extends Scene {
     }
 
     update() {
+        this.coinsText.setText(`Coins: ${this.coins}`);
     }
 
     populateDraggableFood() {

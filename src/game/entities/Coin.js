@@ -20,8 +20,6 @@ class Coin extends Phaser.Physics.Arcade.Sprite {
             duration: 1500,
             ease: 'Quad.easeIn',
             onComplete: () => {
-                this.scene.coins++;
-                this.scene.coinsText.setText(`Coins: ${this.scene.coins}`);
                 this.destroy();
             }
         });
