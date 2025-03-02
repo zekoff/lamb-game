@@ -17,6 +17,7 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
     timeTillNextEmote = 0;
     happiness = 100;
     hunger = 0;
+    beingDragged = false;
 
     constructor(scene, x, y, debugConfig = {}) {
         super(scene, x, y, 'lamb');
@@ -27,12 +28,30 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
         this.setCollideWorldBounds(true);
         this.state = Lamb.STATE_WANDER;
 
-        this.setInteractive();
+        this.setInteractive({ draggable: true });
+        this.on('dragstart', () => {
+            console.log('lamb dragstart');
+            this.anims.play('lamb-scurry');
+            this.emit('lamb-reached-target');
+            this.beingDragged = true;
+        });
+        this.on('drag', (pointer, dragX, dragY) => {
+            this.x = dragX;
+            this.y = dragY;
+        });
+        this.on('dragend', () => {
+            console.log('lamb dragend');
+            this.anims.play('lamb-idle');
+            this.beingDragged = false;
+            // this.emit('lamb-reached-target');
+        });
         this.on('pointerup', this.pet, this);
 
         this.setMovementMode(Lamb.STATE_WANDER);
 
         this.on('lamb-reached-target', () => {
+            this.setVelocity(0);
+            this.target = null;
         });
 
         this.childObjects = this.scene.add.group({ runChildUpdate: true });
@@ -65,8 +84,10 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
         this.timeSinceActivity += delta;
         this.timeSinceEmote += delta;
         this.depth = this.y;
+        // console.log(this.beingDragged);
 
-        if (this.target) {
+        if (this.target || this.beingDragged) {
+            // if (this.target) {
             this.timeSinceActivity = 0;
         }
         if (this.timeSinceActivity > 5000) {
@@ -82,7 +103,8 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
             }
         }
 
-        if (this.conditions.includes(Lamb.CONDITION_BORED)) {
+        if (this.conditions.includes(Lamb.CONDITION_BORED) && !this.beingDragged) {
+            console.log('sending bored lamb to new location');
             const newTarget = this.getRandomLocationInSceneBounds();
             this.sendToLocation(newTarget.x, newTarget.y);
             this.removeCondition(Lamb.CONDITION_BORED);
@@ -103,8 +125,6 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
         if (!this.target) return;
         const distance = Phaser.Math.Distance.Between(this.x, this.y, this.target.x, this.target.y);
         if (distance < 10) { // Arbitrary threshold for "close enough"
-            this.setVelocity(0);
-            this.target = null;
             this.emit('lamb-reached-target');
             this.anims.play('lamb-idle');
         }

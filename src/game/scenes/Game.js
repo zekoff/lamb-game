@@ -61,6 +61,12 @@ export class Game extends Scene {
             repeat: -1
         });
         this.anims.create({
+            key: 'lamb-scurry',
+            frames: this.anims.generateFrameNumbers('lamb', { start: 0, end: 1 }),
+            frameRate: 8,
+            repeat: -1
+        });
+        this.anims.create({
             key: 'lamb-eat',
             frames: this.anims.generateFrameNumbers('lamb', { start: 2, end: 2 }),
             duration: 1000
