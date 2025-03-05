@@ -29,23 +29,15 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
         this.state = Lamb.STATE_WANDER;
 
         this.setInteractive({ draggable: true });
-        this.on('dragstart', () => {
-            console.log('lamb dragstart');
-            this.anims.play('lamb-scurry');
-            this.emit('lamb-reached-target');
-            this.beingDragged = true;
-        });
-        this.on('drag', (pointer, dragX, dragY) => {
-            this.x = dragX;
-            this.y = dragY;
-        });
-        this.on('dragend', () => {
-            console.log('lamb dragend');
-            this.anims.play('lamb-idle');
-            this.beingDragged = false;
-            // this.emit('lamb-reached-target');
-        });
-        this.on('pointerup', this.pet, this);
+        this.on('dragstart', this.onDragStart, this);
+        this.on('drag', this.onDrag, this);
+        this.on('dragend', this.onDragEnd, this);
+        this.on('pointerdown', this.onPointerDown, this);
+        this.on('pointerup', this.onPointerUp, this);
+
+        this.isDragging = false;
+        this.dragThreshold = 10; // Pixels
+        this.startPointerPosition = new Phaser.Math.Vector2();
 
         this.setMovementMode(Lamb.STATE_WANDER);
 
@@ -60,7 +52,41 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
             this.conditions.push(Lamb.CONDITION_HUNGRY);
         }
 
-        this.timeTillNextEmote = Phaser.Math.RND.between(4000, 8000)
+        this.timeTillNextEmote = Phaser.Math.RND.between(4000, 8000);
+    }
+
+    onPointerDown(pointer) {
+        this.startPointerPosition.set(pointer.x, pointer.y);
+        this.isDragging = false;
+    }
+
+    onPointerUp(pointer) {
+        if (!this.isDragging) {
+            console.log(`Tapped ${this.name} at (${pointer.x}, ${pointer.y})`);
+            this.pet();
+        }
+    }
+
+    onDragStart(pointer) {
+        console.log('lamb dragstart');
+        this.anims.play('lamb-scurry');
+        this.emit('lamb-reached-target');
+        this.beingDragged = true;
+    }
+
+    onDrag(pointer, dragX, dragY) {
+        this.x = dragX;
+        this.y = dragY;
+        const distance = Phaser.Math.Distance.Between(this.startPointerPosition.x, this.startPointerPosition.y, pointer.x, pointer.y);
+        if (distance > this.dragThreshold) {
+            this.isDragging = true;
+        }
+    }
+
+    onDragEnd(pointer) {
+        console.log('lamb dragend');
+        this.anims.play('lamb-idle');
+        this.beingDragged = false;
     }
 
     setMovementMode(mode) {
