@@ -86,6 +86,12 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
     onDragEnd(pointer) {
         console.log('lamb dragend');
         this.anims.play('lamb-idle');
+        this.scene.tweens.add({
+            targets: this,
+            y: this.y + 20,
+            duration: 200,
+            ease: 'Cubic.easeIn'
+        });
         this.beingDragged = false;
     }
 
