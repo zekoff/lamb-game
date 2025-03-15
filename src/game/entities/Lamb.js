@@ -4,7 +4,6 @@ import Coin from './Coin';
 
 class Lamb extends Phaser.Physics.Arcade.Sprite {
 
-    static STATE_WANDER = 'wander';
     static SPEED = 100;
     static CONDITION_HUNGRY = 'hungry';
     static CONDITION_BORED = 'bored';
@@ -26,7 +25,6 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
         this.play({ key: 'lamb-idle' });
         this.setScale(2);
         this.setCollideWorldBounds(true);
-        this.state = Lamb.STATE_WANDER;
 
         this.setInteractive({ draggable: true });
         this.on('dragstart', this.onDragStart, this);
@@ -39,7 +37,8 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
         this.dragThreshold = 10; // Pixels
         this.startPointerPosition = new Phaser.Math.Vector2();
 
-        this.setMovementMode(Lamb.STATE_WANDER);
+        const newTarget = this.getRandomLocationInSceneBounds();
+        this.sendToLocation(newTarget.x, newTarget.y);
 
         this.on('lamb-reached-target', () => {
             this.setVelocity(0);
@@ -61,6 +60,7 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
     }
 
     onPointerUp(pointer) {
+        console.log('lamb pointerup');
         if (!this.isDragging) {
             console.log(`Tapped ${this.name} at (${pointer.x}, ${pointer.y})`);
             this.pet();
@@ -95,17 +95,6 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
         this.beingDragged = false;
     }
 
-    setMovementMode(mode) {
-        if (mode === Lamb.STATE_WANDER) {
-            this.state = Lamb.STATE_WANDER;
-            if (!this.target) {
-                const newTarget = this.getRandomLocationInSceneBounds();
-                this.sendToLocation(newTarget.x, newTarget.y);
-            }
-            return;
-        }
-    }
-
     sendToLocation(x, y) {
         this.play('lamb-walk');
         this.scene.physics.moveTo(this, x, y, Lamb.SPEED);
@@ -116,10 +105,8 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
         this.timeSinceActivity += delta;
         this.timeSinceEmote += delta;
         this.depth = this.y;
-        // console.log(this.beingDragged);
 
         if (this.target || this.beingDragged) {
-            // if (this.target) {
             this.timeSinceActivity = 0;
         }
         if (this.timeSinceActivity > 5000) {
@@ -200,6 +187,7 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
         console.log(`Petting ${this.name}`);
         this.disableInteractive();
         this.emote(Emote.HEART);
+        // "Squish" tween effect
         this.scene.tweens.add({
             targets: this,
             scaleY: this.scaleY * .9,
