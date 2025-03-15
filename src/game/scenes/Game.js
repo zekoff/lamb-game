@@ -9,10 +9,12 @@ export class Game extends Scene {
     lambs = null;
     fences = null;
     background = null;
-    pastureObjects = null;
+    pastureObjects = null; // Physics group to test collision
     draggableFood = null;
     coins = 0;
     coinsText = null;
+    uiLayer = null;
+    gameLayer = null;
 
     constructor() {
         super('Game');
@@ -31,23 +33,127 @@ export class Game extends Scene {
 
     create() {
 
-        const gameLayer = this.add.layer();
-        const uiLayer = this.add.layer();
+        this.gameLayer = this.add.layer();
+        this.uiLayer = this.add.layer();
         this.pastureObjects = this.add.group({
             runChildUpdate: true,
         });
 
         this.background = this.add.tileSprite(0, 0, this.scale.width, this.scale.height, 'background');
         this.background.setOrigin(0, 0);
-        gameLayer.add(this.background);
+        this.gameLayer.add(this.background);
 
         const fencesNeeded = Math.ceil(this.scale.width / 64);
         this.fences = this.physics.add.staticGroup({ key: 'fence', frame: 0, repeat: fencesNeeded, setXY: { x: 0, y: 32, stepX: 64 } });
         this.fences.getChildren().forEach(fence => {
             fence.setFrame(Phaser.Math.Between(0, 3));
         });
-        gameLayer.add(this.fences.getChildren());
+        this.gameLayer.add(this.fences.getChildren());
 
+        this.createAnimations();
+
+        // create lambs from Firebase
+        this.lambs = this.add.group({ runChildUpdate: true });
+        const dbRef = ref(getDatabase());
+        get(child(dbRef, 'lambs')).then((snapshot) => {
+            if (snapshot.exists()) {
+                console.log(snapshot.val());
+                this.createLambs(snapshot.val(), this.gameLayer);
+            } else {
+                console.log('No data available');
+            }
+        }).catch((error) => {
+            console.error(error);
+        });
+
+        // create coins from Firebase and listen for changes
+        onValue(child(dbRef, 'inventory'), (snapshot) => {
+            console.log(snapshot.val());
+            this.coins = snapshot.val().coins;
+        });
+        this.events.on('coin-collected', (coin) => {
+            const fbUpdates = {};
+            fbUpdates[`/inventory/coins`] = increment(1);
+            update(ref(getDatabase()), fbUpdates);
+        });
+
+        this.createUi();
+
+        this.setupPhysics();
+
+        EventBus.emit('current-scene-ready', this);
+
+    }
+
+    createLambs(lambObject, gameLayer) {
+        console.log('creating lambs');
+        Object.keys(lambObject).forEach(key => {
+            const lambData = lambObject[key];
+            const newLamb = new Lamb(
+                this,
+                Phaser.Math.Between(128, this.scale.width - 128),
+                Phaser.Math.Between(128, this.scale.height - 128),
+                { [Lamb.CONDITION_HUNGRY]: true }
+            );
+            newLamb.name = key;
+            newLamb.setTint(`0x${lambData.tint}`);
+            newLamb.happiness = lambData.happiness;
+            newLamb.hunger = lambData.hunger;
+            this.lambs.add(newLamb);
+            gameLayer.add(newLamb);
+        }, this);
+    }
+
+    createUi() {
+        // create UI
+        const bottomShelf = this.make.nineslice({
+            x: 128,
+            y: this.scale.height - 128,
+            key: 'nine-slice',
+            width: this.scale.width / 2 - 128,
+            height: 64,
+            leftWidth: 16,
+            rightWidth: 16,
+            topHeight: 16,
+            bottomHeight: 16,
+            scale: {
+                x: 2,
+                y: 2
+            },
+            origin: {
+                x: 0,
+                y: 0
+            },
+            add: true
+        });
+        this.uiLayer.add(bottomShelf);
+        this.coinsText = this.add.text(128, 128, `Coins: ${this.coins}`, { color: 'black', fontSize: '24px', backgroundColor: 'white' });
+        this.uiLayer.add(this.coinsText);
+        this.addDraggableFoodToUi();
+        this.events.on('food-dropped', (food) => {
+            this.pastureObjects.add(food);
+            this.gameLayer.add(food);
+            const hungryLambs = this.lambs.getChildren().filter(lamb => lamb.conditions.includes(Lamb.CONDITION_HUNGRY));
+            if (hungryLambs.length > 0)
+                hungryLambs[0].sendToLocation(food.x, food.y);
+            this.addDraggableFoodToUi()
+        });
+    }
+
+    setupPhysics() {
+        this.physics.add.collider(this.lambs, this.fences);
+        this.physics.add.overlap(this.lambs, this.pastureObjects, (lamb, pastureObject) => {
+            console.log('lamb overlaps pastureObject');
+            if (pastureObject instanceof Food && lamb.conditions.includes(Lamb.CONDITION_HUNGRY)) {
+                const food = pastureObject;
+                lamb.eat(food);
+                food.timeoutTimer.remove();
+                food.destroy();
+            }
+        });
+    }
+
+    createAnimations() {
         this.anims.create({
             key: 'lamb-idle',
             frames: this.anims.generateFrameNumbers('lamb', { start: 0, end: 0 }),
@@ -78,102 +184,13 @@ export class Game extends Scene {
             repeat: -1,
             yoyo: true
         });
-
-        this.lambs = this.add.group({ runChildUpdate: true });
-        const dbRef = ref(getDatabase());
-        get(child(dbRef, 'lambs')).then((snapshot) => {
-            if (snapshot.exists()) {
-                console.log(snapshot.val());
-                this.createLambs(snapshot.val(), gameLayer);
-            } else {
-                console.log('No data available');
-            }
-        }).catch((error) => {
-            console.error(error);
-        });
-        onValue(child(dbRef, 'inventory'), (snapshot) => {
-            console.log(snapshot.val());
-            this.coins = snapshot.val().coins;
-        });
-
-        this.physics.add.collider(this.lambs, this.fences);
-
-        const bottomShelf = this.make.nineslice({
-            x: 128,
-            y: this.scale.height - 128,
-            key: 'nine-slice',
-            width: this.scale.width / 2 - 128,
-            height: 64,
-            leftWidth: 16,
-            rightWidth: 16,
-            topHeight: 16,
-            bottomHeight: 16,
-            scale: {
-                x: 2,
-                y: 2
-            },
-            origin: {
-                x: 0,
-                y: 0
-            },
-            add: true
-        });
-        uiLayer.add(bottomShelf);
-        this.coinsText = this.add.text(128, 128, `Coins: ${this.coins}`, { color: 'black', fontSize: '24px', backgroundColor: 'white' });
-        uiLayer.add(this.coinsText);
-        this.events.on('coin-collected', (coin) => {
-            const fbUpdates = {};
-            fbUpdates[`/inventory/coins`] = increment(1);
-            update(ref(getDatabase()), fbUpdates);
-        });
-
-        this.populateDraggableFood();
-        this.events.on('food-dropped', (food) => {
-            this.pastureObjects.add(food);
-            gameLayer.add(food);
-            const hungryLambs = this.lambs.getChildren().filter(lamb => lamb.conditions.includes(Lamb.CONDITION_HUNGRY));
-            if (hungryLambs.length > 0)
-                hungryLambs[0].sendToLocation(food.x, food.y);
-            this.populateDraggableFood()
-        });
-
-        this.physics.add.overlap(this.lambs, this.pastureObjects, (lamb, food) => {
-            console.log('lamb overlaps food');
-            if (lamb.conditions.includes(Lamb.CONDITION_HUNGRY)) {
-                lamb.eat(food);
-                food.timeoutTimer.remove();
-                food.destroy();
-            }
-        });
-
-        EventBus.emit('current-scene-ready', this);
-
-    }
-
-    createLambs(lambObject, gameLayer) {
-        console.log('creating lambs');
-        Object.keys(lambObject).forEach(key => {
-            const lambData = lambObject[key];
-            const newLamb = new Lamb(
-                this,
-                Phaser.Math.Between(128, this.scale.width - 128),
-                Phaser.Math.Between(128, this.scale.height - 128),
-                { hungry: true }
-            );
-            newLamb.name = key;
-            newLamb.setTint(`0x${lambData.tint}`);
-            newLamb.happiness = lambData.happiness;
-            newLamb.hunger = lambData.hunger;
-            this.lambs.add(newLamb);
-            gameLayer.add(newLamb);
-        }, this);
     }
 
     update() {
         this.coinsText.setText(`Coins: ${this.coins}`);
     }
 
-    populateDraggableFood() {
+    addDraggableFoodToUi() {
         this.draggableFood = new Food(this, 256, this.scale.height - 64);
     }
 

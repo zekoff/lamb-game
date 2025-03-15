@@ -18,40 +18,53 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
     hunger = 0;
     beingDragged = false;
 
-    constructor(scene, x, y, debugConfig = {}) {
+    constructor(scene, x, y, debugConfig) {
         super(scene, x, y, 'lamb');
         scene.add.existing(this);
         scene.physics.add.existing(this);
         this.play({ key: 'lamb-idle' });
         this.setScale(2);
         this.setCollideWorldBounds(true);
+        this.isDragging = false;
+        this.dragThreshold = 10; // Pixels
+        this.startPointerPosition = new Phaser.Math.Vector2();
+        this.timeTillNextEmote = Phaser.Math.RND.between(4000, 8000);
+        this.childObjects = this.scene.add.group({ runChildUpdate: true });
+        if (debugConfig) this.setDebugConditions(debugConfig);
 
+        // set up events and interactivity
         this.setInteractive({ draggable: true });
         this.on('dragstart', this.onDragStart, this);
         this.on('drag', this.onDrag, this);
         this.on('dragend', this.onDragEnd, this);
         this.on('pointerdown', this.onPointerDown, this);
         this.on('pointerup', this.onPointerUp, this);
+        this.on('lamb-reached-target', this.onReachedTarget, this);
 
-        this.isDragging = false;
-        this.dragThreshold = 10; // Pixels
-        this.startPointerPosition = new Phaser.Math.Vector2();
-
+        // give lambs initial movement
         const newTarget = this.getRandomLocationInSceneBounds();
         this.sendToLocation(newTarget.x, newTarget.y);
 
-        this.on('lamb-reached-target', () => {
-            this.setVelocity(0);
-            this.target = null;
-        });
+    }
 
-        this.childObjects = this.scene.add.group({ runChildUpdate: true });
-
+    setDebugConditions(debugConfig) {
         if (debugConfig.hungry) {
             this.conditions.push(Lamb.CONDITION_HUNGRY);
         }
+        if (debugConfig.bored) {
+            this.conditions.push(Lamb.CONDITION_BORED);
+        }
+        if (debugConfig.happiness) {
+            this.happiness = debugConfig.happiness;
+        }
+        if (debugConfig.hunger) {
+            this.hunger = debugConfig.hunger;
+        }
+    }
 
-        this.timeTillNextEmote = Phaser.Math.RND.between(4000, 8000);
+    onReachedTarget() {
+        this.setVelocity(0);
+        this.target = null;
     }
 
     onPointerDown(pointer) {
@@ -67,7 +80,7 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
         }
     }
 
-    onDragStart(pointer) {
+    onDragStart() {
         console.log('lamb dragstart');
         this.anims.play('lamb-scurry');
         this.emit('lamb-reached-target');
@@ -83,7 +96,7 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
         }
     }
 
-    onDragEnd(pointer) {
+    onDragEnd() {
         console.log('lamb dragend');
         this.anims.play('lamb-idle');
         this.scene.tweens.add({
@@ -164,22 +177,7 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
         this.play('lamb-eat').chain('lamb-idle');
         this.removeCondition(Lamb.CONDITION_HUNGRY);
         Array.from({ length: 5 }).forEach(() => {
-            let newCoin = new Coin(this.scene, this.x, this.y);
-            newCoin.setVisible(false);
-            this.scene.tweens.add({
-                onStart: () => {
-                    newCoin.setVisible(true);
-                },
-                delay: Phaser.Math.RND.between(0, 1000),
-                targets: newCoin,
-                x: this.x + Phaser.Math.Between(-64, 64),
-                y: this.y + Phaser.Math.Between(-64, 64),
-                duration: 1000,
-                ease: 'Power1',
-                onComplete: () => {
-                    newCoin.collect();
-                }
-            });
+            new Coin(this.scene, this.x, this.y, true);
         });
     }
 
