@@ -2,6 +2,7 @@ import { Scene } from 'phaser';
 import { EventBus } from '../EventBus';
 import Lamb from '../entities/Lamb';
 import Food from '../entities/Food';
+import Balloon from '../entities/Balloon';
 import { getDatabase, child, ref, get, onValue, increment, update } from 'firebase/database';
 
 export class Game extends Scene {
@@ -11,6 +12,7 @@ export class Game extends Scene {
     background = null;
     pastureObjects = null; // Physics group to test collision
     draggableFood = null;
+    draggableBalloon = null;
     coins = 0;
     coinsText = null;
     uiLayer = null;
@@ -29,6 +31,8 @@ export class Game extends Scene {
         this.load.image('apple', 'apple.png');
         this.load.spritesheet('coin', 'coin.png', { frameWidth: 32, frameHeight: 32 });
         this.load.image('nine-slice', 'test_nine_slice.png');
+        this.load.image('balloon', 'balloon.png');
+        this.load.spritesheet('balloon_sheet', 'balloon_sheet.png', { frameWidth: 32, frameHeight: 32 });
     }
 
     create() {
@@ -72,6 +76,7 @@ export class Game extends Scene {
             this.coins = snapshot.val().coins;
         });
         this.events.on('coin-collected', (coin) => {
+            coin.destroy();
             const fbUpdates = {};
             fbUpdates[`/inventory/coins`] = increment(1);
             update(ref(getDatabase()), fbUpdates);
@@ -131,12 +136,20 @@ export class Game extends Scene {
         this.uiLayer.add(this.coinsText);
         this.addDraggableFoodToUi();
         this.events.on('food-dropped', (food) => {
+            food.disableInteractive();
             this.pastureObjects.add(food);
             this.gameLayer.add(food);
             const hungryLambs = this.lambs.getChildren().filter(lamb => lamb.conditions.includes(Lamb.CONDITION_HUNGRY));
             if (hungryLambs.length > 0)
                 hungryLambs[0].sendToLocation(food.x, food.y);
             this.addDraggableFoodToUi()
+        });
+        this.addDraggableBalloonToUi();
+        this.events.on('balloon-dropped', (balloon) => {
+            balloon.disableInteractive();
+            this.pastureObjects.add(balloon);
+            this.gameLayer.add(balloon);
+            this.addDraggableBalloonToUi();
         });
     }
 
@@ -150,6 +163,19 @@ export class Game extends Scene {
                 food.timeoutTimer.remove();
                 food.destroy();
             }
+            if (pastureObject instanceof Balloon) {
+                this.physics.world.disable(pastureObject);
+                console.log('lamb popped balloon');
+                pastureObject.play('balloon-pop');
+                pastureObject.timeoutTimer.remove();
+                // pastureObject.destroy();
+                pastureObject.on('animationcomplete', () => {
+                    // Call your function here
+                    pastureObject.destroy();
+                });
+            }
+            // pastureObject.timeoutTimer.remove();
+            // pastureObject.destroy();
         });
     }
 
@@ -184,6 +210,12 @@ export class Game extends Scene {
             repeat: -1,
             yoyo: true
         });
+        this.anims.create({
+            key: 'balloon-pop',
+            frames: this.anims.generateFrameNumbers('balloon_sheet', { start: 0, end: 3 }),
+            frameRate: 8,
+            repeat: 0,
+        })
     }
 
     update() {
@@ -192,6 +224,22 @@ export class Game extends Scene {
 
     addDraggableFoodToUi() {
         this.draggableFood = new Food(this, 256, this.scale.height - 64);
+        this.tweens.add({
+            targets: this.draggableFood,
+            scale: { from: 0, to: 2 },
+            duration: 500,
+            ease: 'Power2'
+        });
+    }
+
+    addDraggableBalloonToUi() {
+        this.draggableBalloon = new Balloon(this, 512, this.scale.height - 64);
+        this.tweens.add({
+            targets: this.draggableBalloon,
+            scale: { from: 0, to: 2 },
+            duration: 500,
+            ease: 'Power2'
+        });
     }
 
 }

@@ -27,7 +27,6 @@ class Coin extends Phaser.Physics.Arcade.Sprite {
     }
 
     collect() {
-        this.scene.events.emit('coin-collected', this);
         this.scene.tweens.add({
             targets: this,
             x: this.scene.coinsText.x,
@@ -37,7 +36,7 @@ class Coin extends Phaser.Physics.Arcade.Sprite {
             duration: 1500,
             ease: 'Quad.easeIn',
             onComplete: () => {
-                this.destroy();
+                this.scene.events.emit('coin-collected', this);
             }
         });
     }
