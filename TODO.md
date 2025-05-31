@@ -1,18 +1,16 @@
 # TODO
 
-- Add guitar to UI and create class
-- Expand automatic emotes to cover all lamb conditions
-- Separate head sprite from body sprite so that head can wag
 - Add first hat and tail
 - Add shop/equipment interface (coin cost shown if not yet purchased)
-- Add framework for needs
+- Pull needs from Firebase
+- Cron job adds needs from time to time
 
 # Features for MVP
 
+- Separate head sprite from body sprite so that head can wag
 - Lambs dance (wag their heads) when happy
 - Shop to spend coins on tail attachments and hats
 - Heart means pet, music means music, apple means hungry, thermometer means sick, sad face means bored
-- Cron job adds needs from time to time
 
 # Stretch ideas
 

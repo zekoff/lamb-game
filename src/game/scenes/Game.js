@@ -110,6 +110,7 @@ export class Game extends Scene {
                     // [Lamb.CONDITION_SICK]: lambData.sick || false,
                     [Lamb.CONDITION_SICK]: true,
                     [Lamb.CONDITION_NOMUSIC]: true,
+                    [Lamb.CONDITION_SAD]: true,
                 }
             );
             newLamb.name = key;
@@ -159,6 +160,9 @@ export class Game extends Scene {
             balloon.disableInteractive();
             this.pastureObjects.add(balloon);
             this.gameLayer.add(balloon);
+            const sadLambs = this.lambs.getChildren().filter(lamb => lamb.conditions.includes(Lamb.CONDITION_SAD));
+            if (sadLambs.length > 0)
+                sadLambs[0].sendToLocation(balloon.x, balloon.y);
             this.addDraggableBalloonToUi();
         });
         this.addDraggablePillToUi();
@@ -193,9 +197,10 @@ export class Game extends Scene {
                 food.timeoutTimer.remove();
                 food.destroy();
             }
-            if (pastureObject instanceof Balloon) {
+            if (pastureObject instanceof Balloon && lamb.conditions.includes(Lamb.CONDITION_SAD)) {
                 this.physics.world.disable(pastureObject);
                 console.log('lamb popped balloon');
+                lamb.playWithBalloon();
                 pastureObject.play('balloon-pop');
                 pastureObject.timeoutTimer.remove();
                 // pastureObject.destroy();

@@ -141,8 +141,14 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
                 this.emote(Emote.FOOD);
             } else if (this.conditions.includes(Lamb.CONDITION_SICK)) {
                 this.emote(Emote.SICK);
-            } else {
+            } else if (this.conditions.includes(Lamb.CONDITION_UNLOVED)) {
+                this.emote(Emote.HEART);
+            } else if (this.conditions.includes(Lamb.CONDITION_NOMUSIC)) {
                 this.emote(Emote.MUSIC);
+            } else if (this.conditions.includes(Lamb.CONDITION_SAD)) {
+                this.emote(Emote.SAD);
+            } else {
+                this.emote(Emote.HAPPY);
             }
         }
 
@@ -236,6 +242,19 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
         }
         console.log(`${this.name} is listening to music`);
         this.removeCondition(Lamb.CONDITION_NOMUSIC);
+        this.emote(Emote.HAPPY);
+        Array.from({ length: 5 }).forEach(() => {
+            new Coin(this.scene, this.x, this.y, true);
+        });
+    }
+
+    playWithBalloon() {
+        if (!this.conditions.includes(Lamb.CONDITION_SAD)) {
+            console.log(`${this.name} is not sad`);
+            return;
+        }
+        console.log(`${this.name} is playing with balloon`);
+        this.removeCondition(Lamb.CONDITION_SAD);
         this.emote(Emote.HAPPY);
         Array.from({ length: 5 }).forEach(() => {
             new Coin(this.scene, this.x, this.y, true);
