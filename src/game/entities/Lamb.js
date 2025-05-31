@@ -10,7 +10,7 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
     static CONDITION_UNLOVED = 'unloved';
     static CONDITION_SICK = 'sick';
     static CONDITION_SAD = 'sad';
-    static CONDITION_NOMUSIC = 'no-music';
+    static CONDITION_NOMUSIC = 'noMusic';
 
     target = null;
     childObjects = null;
@@ -214,7 +214,6 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
         Array.from({ length: 5 }).forEach(() => {
             new Coin(this.scene, this.x, this.y, true);
         });
-        // "Squish" tween effect
     }
 
     heal() {
@@ -224,6 +223,19 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
         }
         console.log(`Healing ${this.name}`);
         this.removeCondition(Lamb.CONDITION_SICK);
+        this.emote(Emote.HAPPY);
+        Array.from({ length: 5 }).forEach(() => {
+            new Coin(this.scene, this.x, this.y, true);
+        });
+    }
+
+    listenToMusic() {
+        if (!this.conditions.includes(Lamb.CONDITION_NOMUSIC)) {
+            console.log(`${this.name} is already has music needs met`);
+            return;
+        }
+        console.log(`${this.name} is listening to music`);
+        this.removeCondition(Lamb.CONDITION_NOMUSIC);
         this.emote(Emote.HAPPY);
         Array.from({ length: 5 }).forEach(() => {
             new Coin(this.scene, this.x, this.y, true);

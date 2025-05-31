@@ -5,6 +5,7 @@ import Food from '../entities/Food';
 import Balloon from '../entities/Balloon';
 import { getDatabase, child, ref, get, onValue, increment, update } from 'firebase/database';
 import Pill from '../entities/Pill';
+import Guitar from '../entities/Guitar';
 
 export class Game extends Scene {
 
@@ -14,6 +15,8 @@ export class Game extends Scene {
     pastureObjects = null; // Physics group to test collision
     draggableFood = null;
     draggableBalloon = null;
+    draggablePill = null;
+    draggableGuitar = null;
     coins = 0;
     coinsText = null;
     uiLayer = null;
@@ -35,6 +38,7 @@ export class Game extends Scene {
         this.load.image('balloon', 'balloon.png');
         this.load.spritesheet('balloon_sheet', 'balloon_sheet.png', { frameWidth: 32, frameHeight: 32 });
         this.load.image('pill', 'pill.png');
+        this.load.image('guitar', 'guitar.png');
     }
 
     create() {
@@ -105,6 +109,7 @@ export class Game extends Scene {
                     [Lamb.CONDITION_UNLOVED]: true,
                     // [Lamb.CONDITION_SICK]: lambData.sick || false,
                     [Lamb.CONDITION_SICK]: true,
+                    [Lamb.CONDITION_NOMUSIC]: true,
                 }
             );
             newLamb.name = key;
@@ -166,6 +171,16 @@ export class Game extends Scene {
                 sickLambs[0].sendToLocation(pill.x, pill.y);
             this.addDraggablePillToUi();
         });
+        this.addDraggableGuitarToUi();
+        this.events.on('guitar-dropped', (guitar) => {
+            guitar.disableInteractive();
+            this.pastureObjects.add(guitar);
+            this.gameLayer.add(guitar);
+            const nomusicLambs = this.lambs.getChildren().filter(lamb => lamb.conditions.includes(Lamb.CONDITION_NOMUSIC));
+            if (nomusicLambs.length > 0)
+                nomusicLambs[0].sendToLocation(guitar.x, guitar.y);
+            this.addDraggableGuitarToUi();
+        });
     }
 
     setupPhysics() {
@@ -189,10 +204,17 @@ export class Game extends Scene {
                     pastureObject.destroy();
                 });
             }
-            if (pastureObject instanceof Pill) {
+            if (pastureObject instanceof Pill && lamb.conditions.includes(Lamb.CONDITION_SICK)) {
                 this.physics.world.disable(pastureObject);
                 console.log('lamb took medicine');
                 lamb.heal();
+                pastureObject.timeoutTimer.remove();
+                pastureObject.destroy();
+            }
+            if (pastureObject instanceof Guitar && lamb.conditions.includes(Lamb.CONDITION_NOMUSIC)) {
+                this.physics.world.disable(pastureObject);
+                console.log('lamb listened to music');
+                lamb.listenToMusic();
                 pastureObject.timeoutTimer.remove();
                 pastureObject.destroy();
             }
@@ -266,6 +288,16 @@ export class Game extends Scene {
         this.draggablePill = new Pill(this, 768, this.scale.height - 64);
         this.tweens.add({
             targets: this.draggablePill,
+            scale: { from: 0, to: 2 },
+            duration: 500,
+            ease: 'Power2'
+        });
+    }
+
+    addDraggableGuitarToUi() {
+        this.draggableGuitar = new Guitar(this, 1024, this.scale.height - 64);
+        this.tweens.add({
+            targets: this.draggableGuitar,
             scale: { from: 0, to: 2 },
             duration: 500,
             ease: 'Power2'

@@ -1,6 +1,5 @@
 # TODO
 
-- Add pill to UI and create class
 - Add guitar to UI and create class
 - Expand automatic emotes to cover all lamb conditions
 - Separate head sprite from body sprite so that head can wag

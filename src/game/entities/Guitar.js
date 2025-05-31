@@ -1,9 +1,8 @@
 import Phaser from 'phaser';
 
-export default class Pill extends Phaser.GameObjects.Sprite {
-    constructor(scene, x, y, texture = 'pill') {
-        super(scene, x, y, texture);
-
+class Guitar extends Phaser.Physics.Arcade.Sprite {
+    constructor(scene, x, y) {
+        super(scene, x, y, 'guitar');
         scene.add.existing(this);
         scene.physics.add.existing(this);
         this.setInteractive({ draggable: true });
@@ -12,7 +11,7 @@ export default class Pill extends Phaser.GameObjects.Sprite {
             this.x = dragX;
             this.y = dragY;
         }, this);
-        const pillFadeTweenCallback = () =>
+        const guitarFadeTweenCallback = () =>
             this.scene.tweens.add({
                 targets: this,
                 scale: 0,
@@ -23,22 +22,29 @@ export default class Pill extends Phaser.GameObjects.Sprite {
                 },
                 callbackScope: this
             });
-        const pillFadeConfig = {
+        const guitarFadeConfig = {
             delay: 5000,
-            callback: pillFadeTweenCallback,
+            callback: guitarFadeTweenCallback,
             callbackScope: this
         }
         this.on('dragend', () => {
-            this.scene.events.emit('pill-dropped', this);
-            this.scene.tweens.add({
-                targets: this,
-                scale: 1,
-                duration: 500,
-                ease: 'Bounce.easeOut'
-            });
-            this.timeoutTimer = this.scene.time.addEvent(pillFadeConfig);
+            this.scene.events.emit('guitar-dropped', this);
+            this.startWobble();
+            this.timeoutTimer = this.scene.time.addEvent(guitarFadeConfig);
         });
 
     }
 
+    startWobble() {
+        this.scene.tweens.add({
+            targets: this,
+            scale: { from: 2.1, to: 1.9 },
+            duration: 1000,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut'
+        });
+    }
 }
+
+export default Guitar;
