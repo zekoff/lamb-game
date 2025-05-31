@@ -1,9 +1,9 @@
 # TODO
 
+- Add pill to UI and create class
+- Add guitar to UI and create class
+- Expand automatic emotes to cover all lamb conditions
 - Separate head sprite from body sprite so that head can wag
-- Create thermometer and medicine sprites
-- Create instrument sprite (pair is music note)
-- Create sad face sprite (pair is balloon)
 - Add first hat and tail
 - Add shop/equipment interface (coin cost shown if not yet purchased)
 - Add framework for needs

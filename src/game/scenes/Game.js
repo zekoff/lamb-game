@@ -4,6 +4,7 @@ import Lamb from '../entities/Lamb';
 import Food from '../entities/Food';
 import Balloon from '../entities/Balloon';
 import { getDatabase, child, ref, get, onValue, increment, update } from 'firebase/database';
+import Pill from '../entities/Pill';
 
 export class Game extends Scene {
 
@@ -33,6 +34,7 @@ export class Game extends Scene {
         this.load.image('nine-slice', 'test_nine_slice.png');
         this.load.image('balloon', 'balloon.png');
         this.load.spritesheet('balloon_sheet', 'balloon_sheet.png', { frameWidth: 32, frameHeight: 32 });
+        this.load.image('pill', 'pill.png');
     }
 
     create() {
@@ -98,7 +100,12 @@ export class Game extends Scene {
                 this,
                 Phaser.Math.Between(128, this.scale.width - 128),
                 Phaser.Math.Between(128, this.scale.height - 128),
-                { [Lamb.CONDITION_HUNGRY]: true }
+                {
+                    [Lamb.CONDITION_HUNGRY]: true,
+                    [Lamb.CONDITION_UNLOVED]: true,
+                    // [Lamb.CONDITION_SICK]: lambData.sick || false,
+                    [Lamb.CONDITION_SICK]: true,
+                }
             );
             newLamb.name = key;
             newLamb.setTint(`0x${lambData.tint}`);
@@ -149,6 +156,16 @@ export class Game extends Scene {
             this.gameLayer.add(balloon);
             this.addDraggableBalloonToUi();
         });
+        this.addDraggablePillToUi();
+        this.events.on('pill-dropped', (pill) => {
+            pill.disableInteractive();
+            this.pastureObjects.add(pill);
+            this.gameLayer.add(pill);
+            const sickLambs = this.lambs.getChildren().filter(lamb => lamb.conditions.includes(Lamb.CONDITION_SICK));
+            if (sickLambs.length > 0)
+                sickLambs[0].sendToLocation(pill.x, pill.y);
+            this.addDraggablePillToUi();
+        });
     }
 
     setupPhysics() {
@@ -172,8 +189,13 @@ export class Game extends Scene {
                     pastureObject.destroy();
                 });
             }
-            // pastureObject.timeoutTimer.remove();
-            // pastureObject.destroy();
+            if (pastureObject instanceof Pill) {
+                this.physics.world.disable(pastureObject);
+                console.log('lamb took medicine');
+                lamb.heal();
+                pastureObject.timeoutTimer.remove();
+                pastureObject.destroy();
+            }
         });
     }
 
@@ -234,6 +256,16 @@ export class Game extends Scene {
         this.draggableBalloon = new Balloon(this, 512, this.scale.height - 64);
         this.tweens.add({
             targets: this.draggableBalloon,
+            scale: { from: 0, to: 2 },
+            duration: 500,
+            ease: 'Power2'
+        });
+    }
+
+    addDraggablePillToUi() {
+        this.draggablePill = new Pill(this, 768, this.scale.height - 64);
+        this.tweens.add({
+            targets: this.draggablePill,
             scale: { from: 0, to: 2 },
             duration: 500,
             ease: 'Power2'

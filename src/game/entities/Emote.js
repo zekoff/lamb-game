@@ -8,6 +8,9 @@ class Emote extends Phaser.GameObjects.Sprite {
     static ANGRY = 2;
     static MUSIC = 3;
     static FOOD = 4;
+    static SICK = 5;
+    static SAD = 6;
+    static HAPPY = 7;
 
     constructor(owner, emoteType = Emote.BLANK) {
         super(owner.scene, owner.x, owner.y, 'emote_bubbles');

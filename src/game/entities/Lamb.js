@@ -7,6 +7,10 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
     static SPEED = 100;
     static CONDITION_HUNGRY = 'hungry';
     static CONDITION_BORED = 'bored';
+    static CONDITION_UNLOVED = 'unloved';
+    static CONDITION_SICK = 'sick';
+    static CONDITION_SAD = 'sad';
+    static CONDITION_NOMUSIC = 'no-music';
 
     target = null;
     childObjects = null;
@@ -31,7 +35,8 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
         if (debugConfig) this.setDebugConditions(debugConfig);
 
         // set up events and interactivity
-        this.setInteractive({ draggable: true });
+        // this.setInteractive({ draggable: true });
+        this.setInteractive();
         this.on('dragstart', this.onDragStart, this);
         this.on('drag', this.onDrag, this);
         this.on('dragend', this.onDragEnd, this);
@@ -51,6 +56,18 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
         }
         if (debugConfig.bored) {
             this.conditions.push(Lamb.CONDITION_BORED);
+        }
+        if (debugConfig.unloved) {
+            this.conditions.push(Lamb.CONDITION_UNLOVED);
+        }
+        if (debugConfig.sick) {
+            this.conditions.push(Lamb.CONDITION_SICK);
+        }
+        if (debugConfig.sad) {
+            this.conditions.push(Lamb.CONDITION_SAD);
+        }
+        if (debugConfig.noMusic) {
+            this.conditions.push(Lamb.CONDITION_NOMUSIC);
         }
     }
 
@@ -122,6 +139,8 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
             this.timeTillNextEmote = Phaser.Math.RND.between(4000, 8000);
             if (this.conditions.includes(Lamb.CONDITION_HUNGRY)) {
                 this.emote(Emote.FOOD);
+            } else if (this.conditions.includes(Lamb.CONDITION_SICK)) {
+                this.emote(Emote.SICK);
             } else {
                 this.emote(Emote.MUSIC);
             }
@@ -168,16 +187,14 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
         this.setVelocity(0);
         this.play('lamb-eat').chain('lamb-idle');
         this.removeCondition(Lamb.CONDITION_HUNGRY);
+        this.emote(Emote.HAPPY);
         Array.from({ length: 5 }).forEach(() => {
             new Coin(this.scene, this.x, this.y, true);
         });
     }
 
     pet() {
-        console.log(`Petting ${this.name}`);
         this.disableInteractive();
-        this.emote(Emote.HEART);
-        // "Squish" tween effect
         this.scene.tweens.add({
             targets: this,
             scaleY: this.scaleY * .9,
@@ -186,6 +203,30 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
             ease: 'Power2',
             yoyo: true,
             onComplete: () => this.setInteractive(),
+        });
+        if (!this.conditions.includes(Lamb.CONDITION_UNLOVED)) {
+            console.log(`${this.name} is already loved`);
+            return;
+        }
+        console.log(`Petting ${this.name}`);
+        this.removeCondition(Lamb.CONDITION_UNLOVED);
+        this.emote(Emote.HAPPY);
+        Array.from({ length: 5 }).forEach(() => {
+            new Coin(this.scene, this.x, this.y, true);
+        });
+        // "Squish" tween effect
+    }
+
+    heal() {
+        if (!this.conditions.includes(Lamb.CONDITION_SICK)) {
+            console.log(`${this.name} is not sick`);
+            return;
+        }
+        console.log(`Healing ${this.name}`);
+        this.removeCondition(Lamb.CONDITION_SICK);
+        this.emote(Emote.HAPPY);
+        Array.from({ length: 5 }).forEach(() => {
+            new Coin(this.scene, this.x, this.y, true);
         });
     }
 
