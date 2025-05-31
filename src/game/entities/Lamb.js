@@ -14,8 +14,6 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
     timeSinceActivity = 0;
     timeSinceEmote = 0;
     timeTillNextEmote = 0;
-    happiness = 100;
-    hunger = 0;
     beingDragged = false;
 
     constructor(scene, x, y, debugConfig) {
@@ -53,12 +51,6 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
         }
         if (debugConfig.bored) {
             this.conditions.push(Lamb.CONDITION_BORED);
-        }
-        if (debugConfig.happiness) {
-            this.happiness = debugConfig.happiness;
-        }
-        if (debugConfig.hunger) {
-            this.hunger = debugConfig.hunger;
         }
     }
 

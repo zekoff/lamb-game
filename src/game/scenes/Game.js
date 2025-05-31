@@ -102,8 +102,6 @@ export class Game extends Scene {
             );
             newLamb.name = key;
             newLamb.setTint(`0x${lambData.tint}`);
-            newLamb.happiness = lambData.happiness;
-            newLamb.hunger = lambData.hunger;
             this.lambs.add(newLamb);
             gameLayer.add(newLamb);
         }, this);

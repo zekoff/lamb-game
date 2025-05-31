@@ -1,11 +1,29 @@
 # TODO
 
-- Add tail attachments and hats for lambs
+- Separate head sprite from body sprite so that head can wag
+- Create thermometer and medicine sprites
+- Create instrument sprite (pair is music note)
+- Create sad face sprite (pair is balloon)
+- Add first hat and tail
+- Add shop/equipment interface (coin cost shown if not yet purchased)
+- Add framework for needs
+
+# Features for MVP
+
+- Lambs dance (wag their heads) when happy
+- Shop to spend coins on tail attachments and hats
+- Heart means pet, music means music, apple means hungry, thermometer means sick, sad face means bored
+- Cron job adds needs from time to time
+
+# Stretch ideas
+
+- Re-add lamb behavior state machines
 - Add objects in field with drop zones
 - Let the lambs play together
 - Add different backgrounds
 - Store additional game state in Firebase
-- Add health and medicine
+- Run cron jobs in Firebase Functions to update lamb stats
+- Make nearest hungry lamb seek food when dropped
 
 # BUGS
-- Tapped lambs drop
+- Tapped lambs sink as if dropped from drag
