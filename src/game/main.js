@@ -20,6 +20,9 @@ const config = {
             // debug: true,
             roundPixels: true
         }
+    },
+    audio: {
+        
     }
 };
 

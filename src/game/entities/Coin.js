@@ -12,6 +12,7 @@ class Coin extends Phaser.Physics.Arcade.Sprite {
             this.scene.tweens.add({
                 onStart: () => {
                     this.setVisible(true);
+                    this.scene.sound.play('coin-pickup');
                 },
                 delay: Phaser.Math.RND.between(0, 1000),
                 targets: this,

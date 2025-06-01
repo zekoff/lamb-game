@@ -57,6 +57,9 @@ export class Game extends Scene {
         this.load.image('shop-bg', 'shop-bg.png');
         this.load.spritesheet('ui-arrows', 'ui_arrows.png', { frameWidth: 32, frameHeight: 32 });
         this.load.image('x-button', 'x_button.png');
+        this.load.audio('little-lamb', 'little-lamb.mp3');
+        this.load.audio('coin-pickup', 'coin_pickup.wav');
+        this.load.audio('meet-need', 'meet_need.wav');
     }
 
     create() {
@@ -114,6 +117,7 @@ export class Game extends Scene {
 
         EventBus.emit('current-scene-ready', this);
 
+        this.sound.play('little-lamb', { loop: true });
     }
 
     createLambs(lambObject, gameLayer) {

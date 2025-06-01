@@ -195,6 +195,7 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
         this.play('lamb-eat').chain('lamb-idle');
         this.removeCondition(Lamb.CONDITION_HUNGRY);
         this.emote(Emote.HAPPY);
+        this.scene.sound.play('meet-need');
         Array.from({ length: 5 }).forEach(() => {
             new Coin(this.scene, this.x, this.y, true);
         });
@@ -218,6 +219,7 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
         console.log(`Petting ${this.name}`);
         this.removeCondition(Lamb.CONDITION_UNLOVED);
         this.emote(Emote.HAPPY);
+        this.scene.sound.play('meet-need');
         Array.from({ length: 5 }).forEach(() => {
             new Coin(this.scene, this.x, this.y, true);
         });
@@ -231,6 +233,7 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
         console.log(`Healing ${this.name}`);
         this.removeCondition(Lamb.CONDITION_SICK);
         this.emote(Emote.HAPPY);
+        this.scene.sound.play('meet-need');
         Array.from({ length: 5 }).forEach(() => {
             new Coin(this.scene, this.x, this.y, true);
         });
@@ -244,6 +247,7 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
         console.log(`${this.name} is listening to music`);
         this.removeCondition(Lamb.CONDITION_NOMUSIC);
         this.emote(Emote.HAPPY);
+        this.scene.sound.play('meet-need');
         Array.from({ length: 5 }).forEach(() => {
             new Coin(this.scene, this.x, this.y, true);
         });
@@ -257,6 +261,7 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
         console.log(`${this.name} is playing with balloon`);
         this.removeCondition(Lamb.CONDITION_SAD);
         this.emote(Emote.HAPPY);
+        this.scene.sound.play('meet-need');
         Array.from({ length: 5 }).forEach(() => {
             new Coin(this.scene, this.x, this.y, true);
         });
