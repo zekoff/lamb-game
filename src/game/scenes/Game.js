@@ -6,6 +6,7 @@ import Balloon from '../entities/Balloon';
 import { getDatabase, child, ref, get, onValue, increment, update } from 'firebase/database';
 import Pill from '../entities/Pill';
 import Guitar from '../entities/Guitar';
+import ShopButton from '../entities/ShopButton';
 
 export class Game extends Scene {
 
@@ -41,6 +42,7 @@ export class Game extends Scene {
         this.load.image('guitar', 'guitar.png');
         this.load.image('acc_bow', 'bow.png');
         this.load.spritesheet('accessories', 'accessory.png', { frameWidth: 32, frameHeight: 32 });
+        this.load.image('store', 'store.png');
     }
 
     create() {
@@ -187,6 +189,8 @@ export class Game extends Scene {
                 nomusicLambs[0].sendToLocation(guitar.x, guitar.y);
             this.addDraggableGuitarToUi();
         });
+        const shopButton = new ShopButton(this, this.getBottomBannerIconXPlacement(4), this.scale.height - 64);
+        this.uiLayer.add(shopButton);
     }
 
     setupPhysics() {
@@ -272,7 +276,7 @@ export class Game extends Scene {
     }
 
     addDraggableFoodToUi() {
-        this.draggableFood = new Food(this, 256, this.scale.height - 64);
+        this.draggableFood = new Food(this, this.getBottomBannerIconXPlacement(0), this.scale.height - 64);
         this.tweens.add({
             targets: this.draggableFood,
             scale: { from: 0, to: 2 },
@@ -282,7 +286,7 @@ export class Game extends Scene {
     }
 
     addDraggableBalloonToUi() {
-        this.draggableBalloon = new Balloon(this, 512, this.scale.height - 64);
+        this.draggableBalloon = new Balloon(this, this.getBottomBannerIconXPlacement(1), this.scale.height - 64);
         this.tweens.add({
             targets: this.draggableBalloon,
             scale: { from: 0, to: 2 },
@@ -292,7 +296,7 @@ export class Game extends Scene {
     }
 
     addDraggablePillToUi() {
-        this.draggablePill = new Pill(this, 768, this.scale.height - 64);
+        this.draggablePill = new Pill(this, this.getBottomBannerIconXPlacement(2), this.scale.height - 64);
         this.tweens.add({
             targets: this.draggablePill,
             scale: { from: 0, to: 2 },
@@ -302,13 +306,17 @@ export class Game extends Scene {
     }
 
     addDraggableGuitarToUi() {
-        this.draggableGuitar = new Guitar(this, 1024, this.scale.height - 64);
+        this.draggableGuitar = new Guitar(this, this.getBottomBannerIconXPlacement(3), this.scale.height - 64);
         this.tweens.add({
             targets: this.draggableGuitar,
             scale: { from: 0, to: 2 },
             duration: 500,
             ease: 'Power2'
         });
+    }
+
+    getBottomBannerIconXPlacement(itemIndex = 0) {
+        return 240 + (this.scale.width - 480) / 4 * itemIndex;
     }
 
 }

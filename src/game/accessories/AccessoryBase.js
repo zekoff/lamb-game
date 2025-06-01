@@ -2,9 +2,10 @@ import Phaser from 'phaser';
 
 export default class AccessoryBase extends Phaser.GameObjects.Sprite {
 
+    // attach names to frame indicies
     static DEBUG = 0;
     static EARRINGS = 1;
-    static HAIR = 2;
+    static BROWN_HAIR = 2;
     static PINK_BOW = 3;
     static COWBOY_HAT = 4;
     static PARTY_HAT_BLUE = 5;
@@ -23,6 +24,29 @@ export default class AccessoryBase extends Phaser.GameObjects.Sprite {
     static BONNET_BLUE = 18;
     static BONNET_GREEN = 19;
     static BONNET_PINK = 20;
+
+    static ACCESSORY_LIST = [
+        {id: AccessoryBase.PINK_BOW, name: 'Pink Bow', price: 10, frame: AccessoryBase.PINK_BOW},
+        {id: AccessoryBase.WHITE_BOW, name: 'White Bow', price: 10, frame: AccessoryBase.WHITE_BOW},
+        {id: AccessoryBase.BLUE_BOW, name: 'Blue Bow', price: 25, frame: AccessoryBase.BLUE_BOW},
+        {id: AccessoryBase.GREEN_BOW, name: 'Green Bow', price: 25, frame: AccessoryBase.GREEN_BOW},
+        {id: AccessoryBase.YELLOW_BOW, name: 'Yellow Bow', price: 20, frame: AccessoryBase.YELLOW_BOW},
+        {id: AccessoryBase.ORANGE_BOW, name: 'Orange Bow', price: 20, frame: AccessoryBase.ORANGE_BOW},
+        {id: AccessoryBase.PURPLE_BOW, name: 'Purple Bow', price: 25, frame: AccessoryBase.PURPLE_BOW},
+        {id: AccessoryBase.EARRINGS, name: 'Earrings', price: 25, frame: AccessoryBase.EARRINGS},
+        {id: AccessoryBase.BROWN_HAIR, name: 'Brown Hair', price: 25, frame: AccessoryBase.BROWN_HAIR},
+        {id: AccessoryBase.BLOND_HAIR, name: 'Blond Hair', price: 25, frame: AccessoryBase.BLOND_HAIR},
+        {id: AccessoryBase.RED_HAIR, name: 'Red Hair', price: 25, frame: AccessoryBase.RED_HAIR},
+        {id: AccessoryBase.COWBOY_HAT, name: 'Cowboy Hat', price: 20, frame: AccessoryBase.COWBOY_HAT},
+        {id: AccessoryBase.COWBOY_HAT2, name: 'Cowboy Hat 2', price: 30, frame: AccessoryBase.COWBOY_HAT2},
+        {id: AccessoryBase.PARTY_HAT_BLUE, name: 'Party Hat Blue', price: 25, frame: AccessoryBase.PARTY_HAT_BLUE},
+        {id: AccessoryBase.PARTY_HAT_RED, name: 'Party Hat Red', price: 40, frame: AccessoryBase.PARTY_HAT_RED},
+        {id: AccessoryBase.PARTY_HAT_GREEN, name: 'Party Hat Green', price: 35, frame: AccessoryBase.PARTY_HAT_GREEN},
+        {id: AccessoryBase.BONNET_BLUE, name: 'Bonnet Blue', price: 50, frame: AccessoryBase.BONNET_BLUE},
+        {id: AccessoryBase.BONNET_GREEN, name: 'Bonnet Green', price: 50, frame: AccessoryBase.BONNET_GREEN},
+        {id: AccessoryBase.BONNET_PINK, name: 'Bonnet Pink', price: 75, frame: AccessoryBase.BONNET_PINK},
+        {id: AccessoryBase.RAINBOW_BOW, name: 'Rainbow Bow', price: 100, frame: AccessoryBase.RAINBOW_BOW},
+    ]
     
     lamb = null;
 
