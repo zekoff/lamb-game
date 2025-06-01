@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import Emote from './Emote';
 import Coin from './Coin';
+import AccessoryBase from '../accessories/AccessoryBase';
 
 class Lamb extends Phaser.Physics.Arcade.Sprite {
 
@@ -48,6 +49,7 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
         const newTarget = this.getRandomLocationInSceneBounds();
         this.sendToLocation(newTarget.x, newTarget.y);
 
+        this.acc = new AccessoryBase(scene, x, y, 'accessories', AccessoryBase.BONNET_PINK, this);
     }
 
     setDebugConditions(debugConfig) {

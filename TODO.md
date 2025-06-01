@@ -1,9 +1,10 @@
 # TODO
 
-- Add first hat and tail
 - Add shop/equipment interface (coin cost shown if not yet purchased)
-- Pull needs from Firebase
+- Store/pull needs from Firebase
 - Cron job adds needs from time to time
+- Show how many total hats collected
+- Store which hats are purchased
 
 # Features for MVP
 

@@ -39,6 +39,8 @@ export class Game extends Scene {
         this.load.spritesheet('balloon_sheet', 'balloon_sheet.png', { frameWidth: 32, frameHeight: 32 });
         this.load.image('pill', 'pill.png');
         this.load.image('guitar', 'guitar.png');
+        this.load.image('acc_bow', 'bow.png');
+        this.load.spritesheet('accessories', 'accessory.png', { frameWidth: 32, frameHeight: 32 });
     }
 
     create() {
