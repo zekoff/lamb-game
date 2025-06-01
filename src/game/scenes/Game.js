@@ -163,8 +163,6 @@ export class Game extends Scene {
             add: true
         });
         this.uiLayer.add(bottomShelf);
-        this.coinsText = this.add.text(128, 128, `Coins: ${this.coins}`, { color: 'black', fontSize: '24px', backgroundColor: 'white' });
-        this.uiLayer.add(this.coinsText);
         this.addDraggableFoodToUi();
         this.events.on('food-dropped', (food) => {
             food.disableInteractive();
@@ -239,6 +237,8 @@ export class Game extends Scene {
             },
             add: true
         });
+        this.coinsText = this.add.text(128, 128, `Coins: ${this.coins}`, { color: 'black', fontSize: '24px', backgroundColor: 'white' });
+        this.shopLayer.add(this.coinsText);
 
         // shopDialog.setPosition(this.scale.width / 2, this.scale.height / 2);
         this.shopLayer.add(shopDialog);
@@ -416,7 +416,44 @@ export class Game extends Scene {
             // this.shopLayer.add(itemIcon);
             const itemIcon = this.add.sprite(this.getShopItemIconXPlacement(index), this.scale.height - 116, 'accessories', item.frame);
             itemIcon.setScale(2);
-            itemIcon.setInteractive({ useHandCursor: true });
+            itemIcon.setInteractive({ useHandCursor: true, draggable: true });
+            itemIcon.on('drag', (pointer, dragX, dragY) => {
+                itemIcon.x = dragX;
+                itemIcon.y = dragY;
+            }, this);
+            // itemIcon.on('dragend', (pointer, dragX, dragY) => {
+            //     itemIcon.destroy();
+            //     this.updateShopPage();
+            // }, this);
+            itemIcon.on('drop', (pointer, target) => {
+                itemIcon.destroy();
+                if (target instanceof Lamb) {
+                    // if over lamb
+                    console.log('dropped on lamb', target.name);
+                    // test for enough coins
+                    if (this.coins < item.price) {
+                        console.log('Not enough coins');
+                        return;
+                    }
+                    // add accessory to lamb
+                    if (target.accessory) {
+                        target.accessory.destroy();
+                        target.accessory = null;
+                    }
+                    target.accessory = new AccessoryBase(this, target.x, target.y, 'accessory', itemIcon.frame, target);
+
+                    // update Firebase: subtract coins and add accessory to lamb
+                    // const fbUpdates = {};
+                    // fbUpdates[`/lambs/${dropZone.name}/accessories/${item.name}`] = true;
+                    // update(ref(getDatabase()), fbUpdates);
+                }
+                this.updateShopPage();
+            }, this);
+            itemIcon.on('dragend', (pointer, dragX, dragY, dropped) => {
+                itemIcon.destroy();
+                this.updateShopPage();
+            }, this);
+
             this.currentlyListedItems.push(itemIcon);
 
             const nameText = this.add.text(
@@ -434,6 +471,6 @@ export class Game extends Scene {
             ).setOrigin(0.5);
             this.currentlyListedItems.push(costText);
         });
-    }   
+    }
 
 }

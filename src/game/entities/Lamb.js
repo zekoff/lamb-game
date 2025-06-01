@@ -20,6 +20,7 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
     timeSinceEmote = 0;
     timeTillNextEmote = 0;
     beingDragged = false;
+    accessory = null;
 
     constructor(scene, x, y, debugConfig) {
         super(scene, x, y, 'lamb');
@@ -37,7 +38,7 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
 
         // set up events and interactivity
         // this.setInteractive({ draggable: true });
-        this.setInteractive();
+        this.setInteractive({ dropZone: true });
         this.on('dragstart', this.onDragStart, this);
         this.on('drag', this.onDrag, this);
         this.on('dragend', this.onDragEnd, this);
@@ -49,7 +50,7 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
         const newTarget = this.getRandomLocationInSceneBounds();
         this.sendToLocation(newTarget.x, newTarget.y);
 
-        this.acc = new AccessoryBase(scene, x, y, 'accessories', AccessoryBase.BONNET_PINK, this);
+        this.accessory = new AccessoryBase(scene, x, y, 'accessories', AccessoryBase.BONNET_PINK, this);
     }
 
     setDebugConditions(debugConfig) {

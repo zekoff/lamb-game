@@ -32,6 +32,6 @@ export default class XButton extends Phaser.GameObjects.Sprite {
             });
         };
         this.scene.currentlyListedItems = [];
-
+        this.scene.uiLayer.setVisible(true);
     }
 }
