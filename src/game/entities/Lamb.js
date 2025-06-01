@@ -49,8 +49,6 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
         // give lambs initial movement
         const newTarget = this.getRandomLocationInSceneBounds();
         this.sendToLocation(newTarget.x, newTarget.y);
-
-        this.accessory = new AccessoryBase(scene, x, y, 'accessories', AccessoryBase.BONNET_PINK, this);
     }
 
     setDebugConditions(debugConfig) {

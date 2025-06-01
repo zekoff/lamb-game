@@ -135,6 +135,9 @@ export class Game extends Scene {
             );
             newLamb.name = key;
             newLamb.setTint(`0x${lambData.tint}`);
+            if (lambData.accessory) {
+                newLamb.accessory = new AccessoryBase(this, newLamb.x, newLamb.y, 'accessories', lambData.accessory, newLamb);
+            }
             this.lambs.add(newLamb);
             gameLayer.add(newLamb);
         }, this);
@@ -421,10 +424,6 @@ export class Game extends Scene {
                 itemIcon.x = dragX;
                 itemIcon.y = dragY;
             }, this);
-            // itemIcon.on('dragend', (pointer, dragX, dragY) => {
-            //     itemIcon.destroy();
-            //     this.updateShopPage();
-            // }, this);
             itemIcon.on('drop', (pointer, target) => {
                 itemIcon.destroy();
                 if (target instanceof Lamb) {
@@ -433,6 +432,11 @@ export class Game extends Scene {
                     // test for enough coins
                     if (this.coins < item.price) {
                         console.log('Not enough coins');
+                        const notEnoughCoinsText = this.add.text(this.scale.width / 2, this.scale.height / 2, 'Not enough coins!', { color: 'red', fontSize: '24px', backgroundColor: 'white' }).setOrigin(0.5);
+                        this.time.delayedCall(2000, () => {
+                            notEnoughCoinsText.destroy();
+                        });
+                        this.updateShopPage();
                         return;
                     }
                     // add accessory to lamb
@@ -443,9 +447,11 @@ export class Game extends Scene {
                     target.accessory = new AccessoryBase(this, target.x, target.y, 'accessory', itemIcon.frame, target);
 
                     // update Firebase: subtract coins and add accessory to lamb
-                    // const fbUpdates = {};
-                    // fbUpdates[`/lambs/${dropZone.name}/accessories/${item.name}`] = true;
-                    // update(ref(getDatabase()), fbUpdates);
+                    const fbUpdates = {};
+                    fbUpdates[`/inventory/coins`] = increment(-item.price);
+                    fbUpdates[`/lambs/${target.name}/accessory`] = item.id;
+
+                    update(ref(getDatabase()), fbUpdates);
                 }
                 this.updateShopPage();
             }, this);
