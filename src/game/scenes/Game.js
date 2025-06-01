@@ -119,19 +119,35 @@ export class Game extends Scene {
     createLambs(lambObject, gameLayer) {
         console.log('creating lambs');
         Object.keys(lambObject).forEach(key => {
+            const numConditions = Phaser.Math.RND.integerInRange(1, 2);
+            console.log(`Creating lamb ${key} with ${numConditions} conditions`);
+            const allConditions = [
+                Lamb.CONDITION_HUNGRY,
+                Lamb.CONDITION_UNLOVED,
+                Lamb.CONDITION_SICK,
+                Lamb.CONDITION_NOMUSIC,
+                Lamb.CONDITION_SAD,];
+            const shuffledConditions = Phaser.Math.RND.shuffle(allConditions);
+            const selectedConditions = shuffledConditions.slice(0, numConditions);
+            const conditionsToApply = {};
+            selectedConditions.forEach(condition => {
+                conditionsToApply[condition] = true;
+            });
+            console.log(`conditionsToApply to ${lambObject[key]} `, conditionsToApply);
             const lambData = lambObject[key];
             const newLamb = new Lamb(
                 this,
                 Phaser.Math.Between(128, this.scale.width - 128),
                 Phaser.Math.Between(128, this.scale.height - 128),
-                {
-                    [Lamb.CONDITION_HUNGRY]: true,
-                    [Lamb.CONDITION_UNLOVED]: true,
-                    // [Lamb.CONDITION_SICK]: lambData.sick || false,
-                    [Lamb.CONDITION_SICK]: true,
-                    [Lamb.CONDITION_NOMUSIC]: true,
-                    [Lamb.CONDITION_SAD]: true,
-                }
+                // {
+                //     [Lamb.CONDITION_HUNGRY]: true,
+                //     [Lamb.CONDITION_UNLOVED]: true,
+                //     // [Lamb.CONDITION_SICK]: lambData.sick || false,
+                //     [Lamb.CONDITION_SICK]: true,
+                //     [Lamb.CONDITION_NOMUSIC]: true,
+                //     [Lamb.CONDITION_SAD]: true,
+                // }
+                conditionsToApply
             );
             newLamb.name = key;
             newLamb.setTint(`0x${lambData.tint}`);
