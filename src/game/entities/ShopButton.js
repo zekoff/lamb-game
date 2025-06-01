@@ -19,6 +19,13 @@ export default class ShopButton extends Phaser.GameObjects.Sprite {
 
     onClick() {
         // Override this method in subclasses or instances
-        console.log('ShopButton clicked!');
+        this.scene.shopLayer.setVisible(true);
+        this.scene.shopLayer.bringToTop();
+        this.scene.shopOpen = true;
+        this.scene.updateShopPage();
+        // this.scene.leftArrow.clearTint();
+        // this.scene.rightArrow.clearTint();
+        // if (this.scene.shopPageDisplayed == 0) this.scene.leftArrow.setTint(0x000000);
+        // if (this.scene.shopPageDisplayed == this.scene.maxShopPages - 1) this.scene.rightArrow.setTint(0x000000);
     }
 }

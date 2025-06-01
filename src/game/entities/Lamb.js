@@ -275,7 +275,9 @@ class Lamb extends Phaser.Physics.Arcade.Sprite {
     }
 
     emote(emoteType) {
-        this.childObjects.add(new Emote(this, emoteType));
+        const newEmote = new Emote(this, emoteType)
+        this.childObjects.add(newEmote);
+        this.scene.gameLayer.add(newEmote);
     }
 
 }

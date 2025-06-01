@@ -10,7 +10,7 @@ const config = {
     parent: 'game-container',
     backgroundColor: '#028af8',
     scene: [
-        MainGame
+        MainGame,
     ],
     pixelArt: true,
     physics: {

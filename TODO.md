@@ -24,4 +24,4 @@
 - Make nearest hungry lamb seek food when dropped
 
 # BUGS
-- Tapped lambs sink as if dropped from drag
+- On mobile

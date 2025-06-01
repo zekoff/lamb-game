@@ -38,13 +38,13 @@ export default class AccessoryBase extends Phaser.GameObjects.Sprite {
         {id: AccessoryBase.BLOND_HAIR, name: 'Blond Hair', price: 25, frame: AccessoryBase.BLOND_HAIR},
         {id: AccessoryBase.RED_HAIR, name: 'Red Hair', price: 25, frame: AccessoryBase.RED_HAIR},
         {id: AccessoryBase.COWBOY_HAT, name: 'Cowboy Hat', price: 20, frame: AccessoryBase.COWBOY_HAT},
-        {id: AccessoryBase.COWBOY_HAT2, name: 'Cowboy Hat 2', price: 30, frame: AccessoryBase.COWBOY_HAT2},
-        {id: AccessoryBase.PARTY_HAT_BLUE, name: 'Party Hat Blue', price: 25, frame: AccessoryBase.PARTY_HAT_BLUE},
-        {id: AccessoryBase.PARTY_HAT_RED, name: 'Party Hat Red', price: 40, frame: AccessoryBase.PARTY_HAT_RED},
-        {id: AccessoryBase.PARTY_HAT_GREEN, name: 'Party Hat Green', price: 35, frame: AccessoryBase.PARTY_HAT_GREEN},
-        {id: AccessoryBase.BONNET_BLUE, name: 'Bonnet Blue', price: 50, frame: AccessoryBase.BONNET_BLUE},
-        {id: AccessoryBase.BONNET_GREEN, name: 'Bonnet Green', price: 50, frame: AccessoryBase.BONNET_GREEN},
-        {id: AccessoryBase.BONNET_PINK, name: 'Bonnet Pink', price: 75, frame: AccessoryBase.BONNET_PINK},
+        {id: AccessoryBase.COWBOY_HAT2, name: 'Fancy Cowboy Hat', price: 30, frame: AccessoryBase.COWBOY_HAT2},
+        {id: AccessoryBase.PARTY_HAT_BLUE, name: 'Blue Party Hat', price: 25, frame: AccessoryBase.PARTY_HAT_BLUE},
+        {id: AccessoryBase.PARTY_HAT_RED, name: 'Red Party Hat', price: 40, frame: AccessoryBase.PARTY_HAT_RED},
+        {id: AccessoryBase.PARTY_HAT_GREEN, name: 'Green Party Hat', price: 35, frame: AccessoryBase.PARTY_HAT_GREEN},
+        {id: AccessoryBase.BONNET_BLUE, name: 'Blue Bonnet', price: 50, frame: AccessoryBase.BONNET_BLUE},
+        {id: AccessoryBase.BONNET_GREEN, name: 'Green Bonnet', price: 50, frame: AccessoryBase.BONNET_GREEN},
+        {id: AccessoryBase.BONNET_PINK, name: 'Pink Bonnet', price: 75, frame: AccessoryBase.BONNET_PINK},
         {id: AccessoryBase.RAINBOW_BOW, name: 'Rainbow Bow', price: 100, frame: AccessoryBase.RAINBOW_BOW},
     ]
     
@@ -58,6 +58,7 @@ export default class AccessoryBase extends Phaser.GameObjects.Sprite {
         if (lamb) {
             this.lamb = lamb;
             this.lamb.childObjects.add(this);
+            this.scene.gameLayer.add(this);
         this.setFrame(accType);
         }
     }

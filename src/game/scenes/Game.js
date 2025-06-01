@@ -7,6 +7,9 @@ import { getDatabase, child, ref, get, onValue, increment, update } from 'fireba
 import Pill from '../entities/Pill';
 import Guitar from '../entities/Guitar';
 import ShopButton from '../entities/ShopButton';
+import UiArrows from '../accessories/UiArrows';
+import XButton from '../accessories/XButton';
+import AccessoryBase from '../accessories/AccessoryBase';
 
 export class Game extends Scene {
 
@@ -22,6 +25,14 @@ export class Game extends Scene {
     coinsText = null;
     uiLayer = null;
     gameLayer = null;
+    shopOpen = false;
+    shopLayer = null;
+    shopPageDisplayed = 0;
+    maxShopPages = 4;
+    leftArrow = null;
+    rightArrow = null;
+    xButton = null;
+    currentlyListedItems = null;
 
     constructor() {
         super('Game');
@@ -43,12 +54,16 @@ export class Game extends Scene {
         this.load.image('acc_bow', 'bow.png');
         this.load.spritesheet('accessories', 'accessory.png', { frameWidth: 32, frameHeight: 32 });
         this.load.image('store', 'store.png');
+        this.load.image('shop-bg', 'shop-bg.png');
+        this.load.spritesheet('ui-arrows', 'ui_arrows.png', { frameWidth: 32, frameHeight: 32 });
+        this.load.image('x-button', 'x_button.png');
     }
 
     create() {
 
         this.gameLayer = this.add.layer();
         this.uiLayer = this.add.layer();
+        this.shopLayer = this.add.layer();
         this.pastureObjects = this.add.group({
             runChildUpdate: true,
         });
@@ -93,6 +108,7 @@ export class Game extends Scene {
         });
 
         this.createUi();
+        this.createShop()
 
         this.setupPhysics();
 
@@ -127,10 +143,10 @@ export class Game extends Scene {
     createUi() {
         // create UI
         const bottomShelf = this.make.nineslice({
-            x: 128,
+            x: 72,
             y: this.scale.height - 128,
             key: 'nine-slice',
-            width: this.scale.width / 2 - 128,
+            width: this.scale.width / 2 - 72,
             height: 64,
             leftWidth: 16,
             rightWidth: 16,
@@ -191,6 +207,48 @@ export class Game extends Scene {
         });
         const shopButton = new ShopButton(this, this.getBottomBannerIconXPlacement(4), this.scale.height - 64);
         this.uiLayer.add(shopButton);
+    }
+
+    createShop() {
+        const shopBackground = this.make.image({
+            x: 0,
+            y: 0,
+            key: 'shop-bg',
+            origin: { x: 0, y: 0 },
+            add: true
+        });
+        shopBackground.setDisplaySize(this.scale.width, this.scale.height);
+        this.shopLayer.add(shopBackground);
+        const shopDialog = this.make.nineslice({
+            x: 108,
+            y: this.scale.height - 160,
+            key: 'nine-slice',
+            width: this.scale.width / 2 - 108,
+            height: 80,
+            leftWidth: 16,
+            rightWidth: 16,
+            topHeight: 16,
+            bottomHeight: 16,
+            scale: {
+                x: 2,
+                y: 2
+            },
+            origin: {
+                x: 0,
+                y: 0
+            },
+            add: true
+        });
+
+        // shopDialog.setPosition(this.scale.width / 2, this.scale.height / 2);
+        this.shopLayer.add(shopDialog);
+        this.shopLayer.setVisible(false);
+
+        this.leftArrow = new UiArrows(this, 64, this.scale.height - 64, true);
+        // this.shopLayer.add(leftArrow);
+        this.rightArrow = new UiArrows(this, this.scale.width - 64, this.scale.height - 64, false);
+        // this.shopLayer.add(rightArrow);
+        this.xButton = new XButton(this, this.scale.width - 64, 64);
     }
 
     setupPhysics() {
@@ -273,10 +331,12 @@ export class Game extends Scene {
 
     update() {
         this.coinsText.setText(`Coins: ${this.coins}`);
+
     }
 
     addDraggableFoodToUi() {
         this.draggableFood = new Food(this, this.getBottomBannerIconXPlacement(0), this.scale.height - 64);
+        this.uiLayer.add(this.draggableFood);
         this.tweens.add({
             targets: this.draggableFood,
             scale: { from: 0, to: 2 },
@@ -287,6 +347,7 @@ export class Game extends Scene {
 
     addDraggableBalloonToUi() {
         this.draggableBalloon = new Balloon(this, this.getBottomBannerIconXPlacement(1), this.scale.height - 64);
+        this.uiLayer.add(this.draggableBalloon);
         this.tweens.add({
             targets: this.draggableBalloon,
             scale: { from: 0, to: 2 },
@@ -297,6 +358,7 @@ export class Game extends Scene {
 
     addDraggablePillToUi() {
         this.draggablePill = new Pill(this, this.getBottomBannerIconXPlacement(2), this.scale.height - 64);
+        this.uiLayer.add(this.draggablePill);
         this.tweens.add({
             targets: this.draggablePill,
             scale: { from: 0, to: 2 },
@@ -307,6 +369,7 @@ export class Game extends Scene {
 
     addDraggableGuitarToUi() {
         this.draggableGuitar = new Guitar(this, this.getBottomBannerIconXPlacement(3), this.scale.height - 64);
+        this.uiLayer.add(this.draggableGuitar);
         this.tweens.add({
             targets: this.draggableGuitar,
             scale: { from: 0, to: 2 },
@@ -316,7 +379,61 @@ export class Game extends Scene {
     }
 
     getBottomBannerIconXPlacement(itemIndex = 0) {
-        return 240 + (this.scale.width - 480) / 4 * itemIndex;
+        return 180 + (this.scale.width - 180 * 2) / 4 * itemIndex;
     }
+
+    getShopItemIconXPlacement(itemIndex = 0) {
+        return 200 + (this.scale.width - 200 * 2) / 4 * itemIndex;
+    }
+
+    updateShopPage() {
+        if (this.currentlyListedItems) {
+            this.currentlyListedItems.forEach(item => {
+                item.destroy();
+            });
+        };
+        this.currentlyListedItems = [];
+        // this.shopLayer.setVisible(true);
+        // this.shopLayer.bringToTop();
+        // this.shopOpen = true;
+        this.leftArrow.clearTint();
+        this.rightArrow.clearTint();
+        if (this.shopPageDisplayed == 0) this.leftArrow.setTint(0x000000);
+        if (this.shopPageDisplayed == this.maxShopPages - 1) this.rightArrow.setTint(0x000000);
+
+        const itemListOnPage = AccessoryBase.ACCESSORY_LIST.slice(
+            this.shopPageDisplayed * 5,
+            (this.shopPageDisplayed + 1) * 5
+        );
+
+        itemListOnPage.forEach((item, index) => {
+            // const itemIcon = new item.class(this, this.getShopItemIconXPlacement(index), this.scale.height - 128);
+            // itemIcon.setScale(2);
+            // itemIcon.setInteractive();
+            // itemIcon.on('pointerdown', () => {
+            //     itemIcon.onClick();
+            // });
+            // this.shopLayer.add(itemIcon);
+            const itemIcon = this.add.sprite(this.getShopItemIconXPlacement(index), this.scale.height - 116, 'accessories', item.frame);
+            itemIcon.setScale(2);
+            itemIcon.setInteractive({ useHandCursor: true });
+            this.currentlyListedItems.push(itemIcon);
+
+            const nameText = this.add.text(
+                this.getShopItemIconXPlacement(index),
+                this.scale.height - 60,
+                item.name,
+                { color: 'black', fontSize: '16px', backgroundColor: 'white' }
+            ).setOrigin(0.5);
+            this.currentlyListedItems.push(nameText);
+            const costText = this.add.text(
+                this.getShopItemIconXPlacement(index),
+                this.scale.height - 40,
+                `${item.price} coins`,
+                { color: 'black', fontSize: '16px', backgroundColor: 'white' }
+            ).setOrigin(0.5);
+            this.currentlyListedItems.push(costText);
+        });
+    }   
 
 }
